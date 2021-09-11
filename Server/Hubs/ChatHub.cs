@@ -30,10 +30,16 @@ namespace Dovecord.Server.Hubs
 
         public override async Task OnConnectedAsync()
         {
+            Console.WriteLine(Username);
+            /*
             await Clients.Caller.MessageReceived(
                 new ActorMessage(
                     "greeting", string.Format(LoginGreetingsFormat, Username), "👋", IsGreeting: true));
-
+            */ 
+            await Clients.Caller.MessageReceived(
+                new ActorMessage(
+                    "greeting", $"Hello, {Username}!", "👋", IsGreeting: true));
+            
             await Clients.Others.UserLoggedOn(new Actor(Username));
         }
 
