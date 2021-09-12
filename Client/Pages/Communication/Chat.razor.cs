@@ -65,7 +65,8 @@ namespace Dovecord.Client.Pages.Communication
 
         [Inject]
         public IAccessTokenProvider TokenProvider { get; set; }
-        
+
+        private string placeholder;
         
         protected override async Task OnInitializedAsync()
         {
@@ -104,7 +105,9 @@ namespace Dovecord.Client.Pages.Communication
                 async () =>
                 {
                     _messages[message.Id] = message;
-                    
+                    Console.WriteLine($" Client - {message.Id} - {message.Text} - {message.User}");
+
+                    placeholder = $" Client - {message.Id} - {message.Text} - {message.User}";
                     /*
                     if (message.IsChatBot && message.SayJoke)
                     {
@@ -156,11 +159,11 @@ namespace Dovecord.Client.Pages.Communication
         
         async Task SendMessage()
         {
-            if (_message is { Length: > 0 })
+            if (_messageInput is { Length: > 0 })
             {
                 await _hubConnection.InvokeAsync("PostMessage", _messageInput, _messageId);
 
-                _message = null;
+                _messageInput = null;
                 _messageId = null;
 
                 StateHasChanged();

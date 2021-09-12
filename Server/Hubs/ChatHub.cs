@@ -7,7 +7,8 @@ using Microsoft.Identity.Web.Resource;
 
 namespace Dovecord.Server.Hubs
 {
-    [Authorize, RequiredScope(new[] { "API.Access" })]
+    [Authorize]
+    [RequiredScope("API.Access")]
     public class ChatHub : Hub<IChatClient>
     {
         //readonly ICommandSignalService _commandSignal;
@@ -56,9 +57,12 @@ namespace Dovecord.Server.Hubs
                 return;
             }
             */
-
-            await Clients.All.MessageReceived(
-                new ActorMessage(UseOrCreateId(id), message, Username, IsEdit: id is not null));
+            ActorMessage mess = new ActorMessage(UseOrCreateId(id), message, Username, IsEdit: id is not null);
+            Console.WriteLine($" Server - {mess.Id} - {mess.Text} - {mess.User}");
+            await Clients.All.MessageReceived(mess);
+            
+            //await Clients.All.MessageReceived(
+                //new ActorMessage(UseOrCreateId(id), message, Username, IsEdit: id is not null));
         }
 
         public async Task UserTyping(bool isTyping)

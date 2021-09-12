@@ -32,8 +32,8 @@
             </div>
         <MudPaper Elevation="25" Class="d-flex flex-row px-2 mx-4" Style="background-color: var(--mud-palette-background-grey);">
             <MudIconButton Icon="@Icons.Material.Filled.AddCircle"></MudIconButton>
-            <MudTextField T="string" Placeholder="Enter your message..." DisableUnderLine="true" Class="mt-n2 mx-4"
-                                      @bind-Value="_messageInput" For="@(()=> _messageInput)" />
+            <MudTextField T="string" Placeholder="@placeholder" DisableUnderLine="true" Class="mt-n2 mx-4"
+                                      @bind-Value="_messageInput" />
             <MudButton OnClick="SendMessage" StartIcon="@Icons.Material.Outlined.Send" Color="Color.Secondary" ButtonType="ButtonType.Button">Send</MudButton>
         </MudPaper>
     </MudPaper>
