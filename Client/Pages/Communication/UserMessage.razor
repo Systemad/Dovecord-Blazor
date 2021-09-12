@@ -1,10 +1,11 @@
-﻿<div id="@Id" class="d-flex flex-row my-4">
+﻿@using Dovecord.Shared
+<div id="@Id" class="d-flex flex-row my-4">
     <div class="mr-4">
-        <MudAvatar Color="Color.Secondary" Style="height:50px; width:50px;">@UserName.ToUpper()</MudAvatar>
+        <MudAvatar Color="Color.Secondary" Style="height:50px; width:50px;">@UserName[0]</MudAvatar>
         </div>
      <div>
          <MudText Style="display:inline" Typo="Typo.body1">@UserName</MudText>
-         @* <MudText Typo="Typo.caption" Style="font-size: xx-small!important;">@DateTime</MudText> *@
+         @*<MudText Typo="Typo.caption" Style="font-size: xx-small!important;">@DateTime</MudText> *@
          <MudMenu Style="display:inline" Icon="@Icons.Material.Filled.MoreVert" Dense="true">
              <MudMenuItem>Edit</MudMenuItem>
          </MudMenu>

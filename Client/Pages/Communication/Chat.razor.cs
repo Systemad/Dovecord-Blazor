@@ -104,10 +104,9 @@ namespace Dovecord.Client.Pages.Communication
             await InvokeAsync(
                 async () =>
                 {
-                    _messages[message.Id] = message;
+                    //_messages[message.Id] = message;
+                    _messages.Add(message.Id, message);
                     Console.WriteLine($" Client - {message.Id} - {message.Text} - {message.User}");
-
-                    placeholder = $" Client - {message.Id} - {message.Text} - {message.User}";
                     /*
                     if (message.IsChatBot && message.SayJoke)
                     {

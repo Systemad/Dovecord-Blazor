@@ -25,9 +25,7 @@
                 @foreach (var (id, message) in _messages)
                 {
                     <UserMessage Id="@id" UserName="@message.User" Message="@message.Text" />
-                    
-                    @*<div>@message.Text</div>
-                    <UserMessage UserName="@message.FromUser.Email" Message="@message.Message" DateTime="@message.CreatedTimestamp.ToString("dd MMM, yyyy hh:mm tt")" /> *@
+                    @*<UserMessage UserName="@message.FromUser.Email" Message="@message.Message" DateTime="@message.CreatedTimestamp.ToString("dd MMM, yyyy hh:mm tt")" /> *@
                 }
             </div>
         <MudPaper Elevation="25" Class="d-flex flex-row px-2 mx-4" Style="background-color: var(--mud-palette-background-grey);">
