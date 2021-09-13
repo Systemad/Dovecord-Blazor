@@ -39,7 +39,6 @@ namespace Dovecord.Client.Pages.Communication
         ActorCommand _lastCommand;
 
         [Parameter] public string _messageInput { get; set; }
-        //ElementReference _messageInput;
         //List<SpeechSynthesisVoice> _voices;
         string _voice = "Auto";
         double _voiceSpeed = 1;
@@ -66,6 +65,7 @@ namespace Dovecord.Client.Pages.Communication
         [Inject]
         public IAccessTokenProvider TokenProvider { get; set; }
 
+        private string isTypingMarkup;
         private string placeholder;
         
         protected override async Task OnInitializedAsync()
@@ -88,7 +88,6 @@ namespace Dovecord.Client.Pages.Communication
             //    actor => JavaScript.NotifyAsync("Bye!", $"{actor.User} logged off...")));
 
             await _hubConnection.StartAsync();
-            //await _messageInput.FocusAsync();
 
             //await UpdateClientVoices(
             //    await JavaScript.GetClientVoices(this));
@@ -104,8 +103,8 @@ namespace Dovecord.Client.Pages.Communication
             await InvokeAsync(
                 async () =>
                 {
-                    //_messages[message.Id] = message;
-                    _messages.Add(message.Id, message);
+                    _messages[message.Id] = message;
+                    //_messages.Add(message.Id, message);
                     Console.WriteLine($" Client - {message.Id} - {message.Text} - {message.User}");
                     /*
                     if (message.IsChatBot && message.SayJoke)
@@ -140,6 +139,8 @@ namespace Dovecord.Client.Pages.Communication
                     ? _usersTyping.Add(new(user))
                     : _usersTyping.Remove(new(user));
 
+                Log.LogInformation($"Client receive user typing methodd: {actorAction.IsTyping}");
+                Console.WriteLine($"User: {actorAction.User} - Typing: {actorAction.IsTyping}");
                 StateHasChanged();
             });
         
@@ -188,7 +189,7 @@ namespace Dovecord.Client.Pages.Communication
 
             await _hubConnection.InvokeAsync("UserTyping", _isTyping = isTyping);
         }
-        
+
         async Task AppendToMessage(string text)
         {
             _message += text;

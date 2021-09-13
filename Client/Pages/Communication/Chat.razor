@@ -21,17 +21,37 @@
                 <MudIconButton OnClick="@(() => OpenDrawer(Anchor.Right))" Icon="@Icons.Material.Outlined.PeopleAlt" Color="Color.Inherit" Class="ml-3" />
             </MudHidden>
         </MudToolBar>
-            <div class="d-flex flex-column px-4" style="max-height:70vh; overflow:scroll;" id="chatContainer">
-                @foreach (var (id, message) in _messages)
-                {
-                    <UserMessage Id="@id" UserName="@message.User" Message="@message.Text" />
-                    @*<UserMessage UserName="@message.FromUser.Email" Message="@message.Message" DateTime="@message.CreatedTimestamp.ToString("dd MMM, yyyy hh:mm tt")" /> *@
-                }
-            </div>
+        <div class="d-flex flex-column px-4" style="max-height:70vh; overflow:scroll;" id="chatContainer">
+            @foreach (var (id, message) in _messages)
+            {
+                <UserMessage Id="@id" UserName="@message.User" Message="@message.Text" />
+                    
+                    @*<div>@message.Text</div>
+                    <UserMessage UserName="@message.FromUser.Email" Message="@message.Message" DateTime="@message.CreatedTimestamp.ToString("dd MMM, yyyy hh:mm tt")" /> *@
+            }
+        </div>
+        <MudPaper Elevation="0" Style="margin-left: 10px">
+                        @{
+                            static string UsersTypingText(string[] usersTyping) => usersTyping?.Length switch
+                            {
+                                0 => "&nbsp;",
+                                1 => $"💬 <strong>{usersTyping[0]}</strong> is typing...",
+                                2 => $"💬 <strong>${usersTyping[0]}</strong> and <strong>${usersTyping[1]}</strong> are typing...",
+                                _ => "💬 Multiple people are typing..."
+                                };
+                            MarkupString isTypingMarkup = new(UsersTypingText(_usersTyping?.Select(a => a.User).ToArray()));
+                            if(_usersTyping is { Count: > 0 })
+                                @isTypingMarkup
+                            
+                            Console.WriteLine($"markup user string type {isTypingMarkup}");
+                        }
+                        
+        </MudPaper>
         <MudPaper Elevation="25" Class="d-flex flex-row px-2 mx-4" Style="background-color: var(--mud-palette-background-grey);">
             <MudIconButton Icon="@Icons.Material.Filled.AddCircle"></MudIconButton>
-            <MudTextField T="string" Placeholder="@placeholder" DisableUnderLine="true" Class="mt-n2 mx-4"
-                                      @bind-Value="_messageInput" />
+            
+            <MudTextField AutoFocus="true" T="string" Placeholder="Enter your message..." DisableUnderLine="true" Class="mt-n2 mx-4"
+                          TextChanged="InitiateDebounceUserIsTyping" @bind-Value="_messageInput" />
             <MudButton OnClick="SendMessage" StartIcon="@Icons.Material.Outlined.Send" Color="Color.Secondary" ButtonType="ButtonType.Button">Send</MudButton>
         </MudPaper>
     </MudPaper>
@@ -82,6 +102,7 @@
         ChatDrawer = anchor;
         open = true;
     }
+    
     
     public string headline { get; set; }
     

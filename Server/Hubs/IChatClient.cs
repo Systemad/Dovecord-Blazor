@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Dovecord.Shared;
 
 namespace Dovecord.Server.Hubs
@@ -12,6 +13,8 @@ namespace Dovecord.Server.Hubs
         Task UserTyping(ActorAction action);
 
         Task MessageReceived(ActorMessage message);
+
+        Task SendConnectedUsers(IEnumerable<string> users);
 
         //Task CommandSignalReceived(ActorCommand command);
     }

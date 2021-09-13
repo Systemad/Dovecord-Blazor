@@ -11,6 +11,9 @@ namespace Dovecord.Server.Hubs
     [RequiredScope("API.Access")]
     public class ChatHub : Hub<IChatClient>
     {
+        
+        private static readonly ConnectionMapping<string> _connections = 
+            new ConnectionMapping<string>();
         //readonly ICommandSignalService _commandSignal;
 
         const string LoginGreetingsFormat =
@@ -32,6 +35,7 @@ namespace Dovecord.Server.Hubs
         public override async Task OnConnectedAsync()
         {
             Console.WriteLine(Username);
+            _connections.Add(Username, Context.ConnectionId);
             /*
             await Clients.Caller.MessageReceived(
                 new ActorMessage(
@@ -40,12 +44,17 @@ namespace Dovecord.Server.Hubs
             await Clients.Caller.MessageReceived(
                 new ActorMessage(
                     "greeting", $"Hello, {Username}!", "👋", IsGreeting: true));
+
+            //await Clients.All.SendConnectedUsers(_connections.GetConnections());
             
             await Clients.Others.UserLoggedOn(new Actor(Username));
         }
 
         public override async Task OnDisconnectedAsync(Exception? ex)
-             => await Clients.Others.UserLoggedOff(new Actor(Username));
+        {
+            _connections.Remove(Username, Context.ConnectionId);
+            await Clients.Others.UserLoggedOff(new Actor(Username));
+        }
 
         public async Task PostMessage(string message, string id = null!)
         {
@@ -66,7 +75,7 @@ namespace Dovecord.Server.Hubs
         }
 
         public async Task UserTyping(bool isTyping)
-            => await Clients.Others.UserTyping(new ActorAction(Username, isTyping));
+            => await Clients.All.UserTyping(new ActorAction(Username, isTyping));
 
         static string UseOrCreateId(string id)
             => string.IsNullOrWhiteSpace(id) ? Guid.NewGuid().ToString() : id;
