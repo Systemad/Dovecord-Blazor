@@ -136,11 +136,10 @@ namespace Dovecord.Client.Pages.Communication
             {
                 var (user, isTyping) = actorAction;
                 _ = isTyping
-                    ? _usersTyping.Add(new(user))
-                    : _usersTyping.Remove(new(user));
+                    ? _usersTyping.Add(new Actor(user))
+                    : _usersTyping.Remove(new Actor(user));
 
-                Log.LogInformation($"Client receive user typing methodd: {actorAction.IsTyping}");
-                Console.WriteLine($"User: {actorAction.User} - Typing: {actorAction.IsTyping}");
+                Log.LogInformation($"Client receive user typing method: {actorAction.IsTyping}");
                 StateHasChanged();
             });
         
@@ -193,8 +192,6 @@ namespace Dovecord.Client.Pages.Communication
         async Task AppendToMessage(string text)
         {
             _message += text;
-
-            //await _messageInput.FocusAsync();
             await SetIsTyping(false);
         }
         
@@ -212,9 +209,6 @@ namespace Dovecord.Client.Pages.Communication
                 {
                     _messageId = message.Id;
                     _message = message.Text;
-
-                    //await _messageInput.FocusAsync();
-
                     StateHasChanged();
                 });
         }

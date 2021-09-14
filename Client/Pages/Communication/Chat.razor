@@ -25,33 +25,29 @@
             @foreach (var (id, message) in _messages)
             {
                 <UserMessage Id="@id" UserName="@message.User" Message="@message.Text" />
-                    
-                    @*<div>@message.Text</div>
-                    <UserMessage UserName="@message.FromUser.Email" Message="@message.Message" DateTime="@message.CreatedTimestamp.ToString("dd MMM, yyyy hh:mm tt")" /> *@
             }
         </div>
-        <MudPaper Elevation="0" Style="margin-left: 10px">
-                        @{
-                            static string UsersTypingText(string[] usersTyping) => usersTyping?.Length switch
-                            {
-                                0 => "&nbsp;",
-                                1 => $"💬 <strong>{usersTyping[0]}</strong> is typing...",
-                                2 => $"💬 <strong>${usersTyping[0]}</strong> and <strong>${usersTyping[1]}</strong> are typing...",
-                                _ => "💬 Multiple people are typing..."
-                                };
-                            MarkupString isTypingMarkup = new(UsersTypingText(_usersTyping?.Select(a => a.User).ToArray()));
-                            if(_usersTyping is { Count: > 0 })
-                                @isTypingMarkup
-                            
-                            Console.WriteLine($"markup user string type {isTypingMarkup}");
-                        }
-                        
+        <MudPaper Elevation="0" Style="margin-left: 15px">
+            @{
+                static string UsersTypingText(string[] usersTyping) => usersTyping?.Length switch
+                {
+                    0 => "&nbsp;",
+                    1 => $"<strong>{usersTyping[0]}</strong> is typing...",
+                    2 => $"<strong>${usersTyping[0]}</strong> and <strong>${usersTyping[1]}</strong> are typing...",
+                    _ => "Multiple people are typing..."
+                };
+
+                MarkupString isTypingMarkup = new(UsersTypingText(_usersTyping?.Select(a => a.User).ToArray()));
+                //<span class="text-muted @(_usersTyping is { Count: > 0 } ? "flashing" : "")">
+                    @isTypingMarkup
+                //</span>
+            }
         </MudPaper>
-        <MudPaper Elevation="25" Class="d-flex flex-row px-2 mx-4" Style="background-color: var(--mud-palette-background-grey);">
+                        <MudPaper Elevation="25" Class="d-flex flex-row px-2 mx-4" Style="background-color: var(--mud-palette-background-grey);">
             <MudIconButton Icon="@Icons.Material.Filled.AddCircle"></MudIconButton>
             
             <MudTextField AutoFocus="true" T="string" Placeholder="Enter your message..." DisableUnderLine="true" Class="mt-n2 mx-4"
-                          TextChanged="InitiateDebounceUserIsTyping" @bind-Value="_messageInput" />
+                          Immediate="true" TextChanged="InitiateDebounceUserIsTyping" @bind-Value="_messageInput" />
             <MudButton OnClick="SendMessage" StartIcon="@Icons.Material.Outlined.Send" Color="Color.Secondary" ButtonType="ButtonType.Button">Send</MudButton>
         </MudPaper>
     </MudPaper>
