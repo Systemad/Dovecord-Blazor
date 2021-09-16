@@ -25,7 +25,7 @@
         <div class="d-flex flex-column px-4" style="max-height:70vh; overflow:scroll;" id="chatContainer">
             @foreach (var (id, message) in _messages)
             {
-                <UserMessage Id="@id" ActorMessage="message" DeleteMessage="((s, amessage) =>  DeleteMessageById(id, amessage))" />
+                <UserMessage Id="@id" ActorMessage="message" DeleteMessage="((s, amessage) =>  DeleteMessageById(id, amessage))" ActualUser="@CurrentUsername" />
             }
         </div>
         <MudPaper Elevation="0" Style="margin-left: 15px">

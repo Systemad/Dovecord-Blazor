@@ -68,6 +68,7 @@ namespace Dovecord.Client.Pages.Communication
 
         private string isTypingMarkup;
         private string placeholder;
+        private string CurrentUsername;
         
         protected override async Task OnInitializedAsync()
         {
@@ -91,6 +92,9 @@ namespace Dovecord.Client.Pages.Communication
 
             await _hubConnection.StartAsync();
 
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            CurrentUsername = user.Identity.Name;
             //await UpdateClientVoices(
             //    await JavaScript.GetClientVoices(this));
         }
@@ -220,6 +224,7 @@ namespace Dovecord.Client.Pages.Communication
                     StateHasChanged();
                 });
         }
+        
         async Task DeleteMessageById(string id, ActorMessage message)
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
