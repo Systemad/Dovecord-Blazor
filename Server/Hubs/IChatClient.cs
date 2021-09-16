@@ -14,7 +14,10 @@ namespace Dovecord.Server.Hubs
 
         Task MessageReceived(ActorMessage message);
 
-        Task SendConnectedUsers(IEnumerable<string> users);
+        Task DeleteMessageReceived(string id);
+
+        //Task SendConnectedUsers(IEnumerable<string> users);
+
 
         //Task CommandSignalReceived(ActorCommand command);
     }

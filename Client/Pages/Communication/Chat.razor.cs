@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Dovecord.Client.Pages.Communication
 {
@@ -46,7 +47,7 @@ namespace Dovecord.Client.Pages.Communication
         public Chat() =>
             _debouceTimer.Elapsed +=
                 async (sender, args) => await SetIsTyping(false);
-        
+
         [Parameter]
         public ClaimsPrincipal User { get; set; }
 
@@ -80,6 +81,7 @@ namespace Dovecord.Client.Pages.Communication
 
             _hubRegistrations.Add(_hubConnection.OnMessageReceived(OnMessageReceivedAsync));
             _hubRegistrations.Add(_hubConnection.OnUserTyping(OnUserTypingAsync));
+            _hubRegistrations.Add(_hubConnection.OnDeleteMessageReceived(OnDeleteMessageReceived));
             //_hubRegistrations.Add(
             //    _hubConnection.OnCommandSignalReceived(OnCommandSignalReceived));
             //_hubRegistrations.Add(_hubConnection.OnUserLoggedOn(
@@ -98,6 +100,12 @@ namespace Dovecord.Client.Pages.Communication
             var result = await TokenProvider.RequestAccessToken();
             return result.TryGetToken(out var accessToken) ? accessToken.Value : null;
         }
+
+        async Task OnDeleteMessageReceived(string messageId) => await InvokeAsync(async () =>
+        {
+            _messages.Remove(messageId);
+            StateHasChanged();
+        });
         
         async Task OnMessageReceivedAsync(ActorMessage message) =>
             await InvokeAsync(
@@ -142,6 +150,8 @@ namespace Dovecord.Client.Pages.Communication
                 Log.LogInformation($"Client receive user typing method: {actorAction.IsTyping}");
                 StateHasChanged();
             });
+        
+        bool OwnsMessage(string user) => User.Identity.Name == user;
         
         async Task OnKeyUp(KeyboardEventArgs args)
         {
@@ -194,8 +204,6 @@ namespace Dovecord.Client.Pages.Communication
             _message += text;
             await SetIsTyping(false);
         }
-        
-        bool OwnsMessage(string user) => User.Identity.Name == user;
 
         async Task StartEdit(ActorMessage message)
         {
@@ -211,6 +219,21 @@ namespace Dovecord.Client.Pages.Communication
                     _message = message.Text;
                     StateHasChanged();
                 });
+        }
+        async Task DeleteMessageById(string id, ActorMessage message)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            if (message.User != user.Identity.Name)
+            {
+                Console.WriteLine("Message not owned by user");
+                return;
+            }
+
+            await InvokeAsync(async () =>
+            {
+                await _hubConnection.InvokeAsync("DeleteMessageById", id);
+            });
         }
         
         public async ValueTask DisposeAsync()

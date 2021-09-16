@@ -74,8 +74,12 @@ namespace Dovecord.Server.Hubs
                 //new ActorMessage(UseOrCreateId(id), message, Username, IsEdit: id is not null));
         }
 
+        public async Task DeleteMessageById(string messageId)
+        {
+            await Clients.All.DeleteMessageReceived(messageId);
+        }
         public async Task UserTyping(bool isTyping)
-            => await Clients.All.UserTyping(new ActorAction(Username, isTyping));
+            => await Clients.Others.UserTyping(new ActorAction(Username, isTyping));
 
         static string UseOrCreateId(string id)
             => string.IsNullOrWhiteSpace(id) ? Guid.NewGuid().ToString() : id;

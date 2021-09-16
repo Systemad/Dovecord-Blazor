@@ -10,6 +10,10 @@ namespace Dovecord.Client.Extensions
         public static IDisposable OnMessageReceived(
             this HubConnection connection, Func<ActorMessage, Task> handler) =>
             connection.On("MessageReceived", handler);
+        
+        public static IDisposable OnDeleteMessageReceived(
+            this HubConnection connection, Func<string, Task> handler) =>
+            connection.On("DeleteMessageReceived", handler);
 
         public static IDisposable OnUserLoggedOn(
             this HubConnection connection, Func<Actor, Task> handler) =>
