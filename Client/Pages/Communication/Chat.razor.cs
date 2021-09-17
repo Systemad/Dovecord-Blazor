@@ -211,25 +211,23 @@ namespace Dovecord.Client.Pages.Communication
 
         async Task StartEdit(ActorMessage message)
         {
-            if (!OwnsMessage(message.User))
+            if (message.User != CurrentUsername)
             {
                 return;
             }
-
+            
             await InvokeAsync(
                 async () =>
                 {
                     _messageId = message.Id;
-                    _message = message.Text;
+                    _messageInput = message.Text;
                     StateHasChanged();
                 });
         }   
         
         async Task DeleteMessageById(ActorMessage message)
         {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-            if (message.User != user.Identity.Name)
+            if (message.User != CurrentUsername)
             {
                 Console.WriteLine("Message not owned by user");
                 return;
