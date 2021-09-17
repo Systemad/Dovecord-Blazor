@@ -223,9 +223,9 @@ namespace Dovecord.Client.Pages.Communication
                     _message = message.Text;
                     StateHasChanged();
                 });
-        }
+        }   
         
-        async Task DeleteMessageById(string id, ActorMessage message)
+        async Task DeleteMessageById(ActorMessage message)
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
@@ -237,7 +237,7 @@ namespace Dovecord.Client.Pages.Communication
 
             await InvokeAsync(async () =>
             {
-                await _hubConnection.InvokeAsync("DeleteMessageById", id);
+                await _hubConnection.InvokeAsync("DeleteMessageById", message.Id);
             });
         }
         
