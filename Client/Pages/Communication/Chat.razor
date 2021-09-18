@@ -1,7 +1,7 @@
 @page "/chat"
 @using System.Security.Claims
 
-<div class="d-flex flex-grow-1 flex-row">
+<div class="d-flex flex-grow-1 flex-row" style="max-height:88vH;min-height:88vH">
     <MudHidden Breakpoint="Breakpoint.SmAndDown">
         <MudPaper Elevation="25" Class="pa-3 mr-6" MinWidth="250px">
             <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Secondary" FullWidth="true">Create Channel</MudButton>
@@ -47,7 +47,7 @@
                 //</span>
             }
         </MudPaper>
-                        <MudPaper Elevation="25" Class="d-flex flex-row px-2 mx-4" Style="background-color: var(--mud-palette-background-grey);">
+        <MudPaper Class="d-flex flex-row px-2 mx-4" Style="background-color: var(--mud-palette-background-grey);">
             <MudIconButton Icon="@Icons.Material.Filled.AddCircle"></MudIconButton>
             
             <MudTextField AutoFocus="true" T="string" Placeholder="Enter your message..." DisableUnderLine="true" Class="mt-n2 mx-4"
