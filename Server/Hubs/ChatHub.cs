@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Dovecord.Data;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -16,19 +17,7 @@ namespace Dovecord.Server.Hubs
         private static readonly ConnectionMapping<string> _connections = 
             new ConnectionMapping<string>();
         //readonly ICommandSignalService _commandSignal;
-
-        const string LoginGreetingsFormat =
-@"💯 Hi, {0}! This chat application is powered by SignalR 👍🏽 ... Let's command some joke chatbots!
-<br>
-<br> <strong>Command format:</strong>
-<br> &nbsp; <pre><code>(joke|jokes)[:dad|chucknorris][:en (or another two letter locale i.e.; bg)]</code></pre>
-<br> <strong>Examples:</strong>
-<br> &nbsp; 1) typing ""jokes:chucknorris:bg"" will start the ""Chuck Norris"" chatbot, which will speak jokes continously in Bulgarian.
-<br> &nbsp; 2) typing ""joke"" will start the ""Dad"" chatbot, and speak a single joke in English.
-<br>
-<br> <strong>Notes:</strong>
-<br> &nbsp;Anyone can command these and they are shared for all. Type ""stop"" to issue a global stop command. Finally, mix and match single or continous joke(s), joke types and locales...";
-
+        
         string Username => Context?.User?.Identity?.Name ?? "Unknown";
         private string UserId => Context?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -36,6 +25,7 @@ namespace Dovecord.Server.Hubs
 
         public override async Task OnConnectedAsync()
         {
+            
             Console.WriteLine(Username);
             _connections.Add(Username, Context.ConnectionId);
             /*
