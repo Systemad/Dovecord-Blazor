@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.Authorization;
@@ -29,6 +30,7 @@ namespace Dovecord.Server.Hubs
 <br> &nbsp;Anyone can command these and they are shared for all. Type ""stop"" to issue a global stop command. Finally, mix and match single or continous joke(s), joke types and locales...";
 
         string Username => Context?.User?.Identity?.Name ?? "Unknown";
+        private string UserId => Context?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         //public ChatHub(ICommandSignalService commandSignal) => _commandSignal = commandSignal;
 
@@ -66,6 +68,7 @@ namespace Dovecord.Server.Hubs
                 return;
             }
             */
+            
             ActorMessage mess = new ActorMessage(UseOrCreateId(id), message, Username, IsEdit: id is not null);
             Console.WriteLine($" Server - {mess.Id} - {mess.Text} - {mess.User}");
             await Clients.All.MessageReceived(mess);

@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Client\Dovecord.Client.csproj" />
+    <ProjectReference Include="..\Dovecord.Data\Dovecord.Data.csproj" />
     <ProjectReference Include="..\Shared\Dovecord.Shared.csproj" />
   </ItemGroup>
 
@@ -19,6 +20,11 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.10" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Design" Version="1.1.6" />
     <PackageReference Include="Microsoft.Identity.Web" Version="1.16.1" />
     <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.16.1" />
   </ItemGroup>
