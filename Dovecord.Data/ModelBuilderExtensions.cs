@@ -1,12 +1,14 @@
 using Dovecord.Shared;
 using Microsoft.EntityFrameworkCore;
 
+/*
 namespace Dovecord.Data
 {
     public class ModelBuilderExtensions
     {
         public static void Seed(ModelBuilder modelBuilder)
         {
+            
             modelBuilder.Entity<Server>().HasData(new Server
             {
                 Id = 0,
@@ -36,3 +38,4 @@ namespace Dovecord.Data
         
     }
 }
+*/

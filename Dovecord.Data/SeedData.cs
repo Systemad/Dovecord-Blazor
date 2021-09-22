@@ -14,7 +14,7 @@ namespace Dovecord.Data
                 serviceProvider.GetRequiredService<
                     DbContextOptions<ApplicationDbContext>>()))
             {
-                if (context.Servers.Any() && context.Channels.Any() && context.Users.Any()) return;
+                //if (context.Servers.Any() && context.Channels.Any() && context.Users.Any()) return;
                 Console.WriteLine("database has not been seed");
             }
         }
