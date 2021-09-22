@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+/*
 namespace Dovecord.Shared
 {
     public sealed class PrivateUser
@@ -27,3 +28,5 @@ namespace Dovecord.Shared
         public virtual User ToUser { get; set; }
     }
 }
+
+*/

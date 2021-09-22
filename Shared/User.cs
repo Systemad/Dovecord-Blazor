@@ -9,7 +9,8 @@ namespace Dovecord.Shared
     
     public class User
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
+        public string Guid { get; set; }
         public string Username { get; set; }
         //public Color Color { get; set; }
         

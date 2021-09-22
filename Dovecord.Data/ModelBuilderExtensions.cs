@@ -26,7 +26,8 @@ namespace Dovecord.Data
 
             modelBuilder.Entity<User>().HasData(new User
             {
-                Id = "ca0f4479-5992-4a00-a3d5-d73ae1daff6",
+                Id = 0,
+                Guid = "ca0f4479-5992-4a00-a3d5-d73ae1daff6",
                 Username = "danova",
                 ServerId = 0,
                 //Server = null

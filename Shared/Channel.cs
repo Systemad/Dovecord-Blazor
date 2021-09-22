@@ -13,6 +13,7 @@ namespace Dovecord.Shared
         }
         
         public int Id { get; set; }
+        public string Guid { get; set; }
         public string ChannelName { get; set; }
         public virtual ICollection<ChannelMessage> ChannelMessages { get; set; }
 

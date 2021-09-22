@@ -4,7 +4,8 @@ namespace Dovecord.Shared
 {
     public class ChannelMessage
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
+        public string Guid { get; set; }
         public string Content { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsEdit { get; set; }
