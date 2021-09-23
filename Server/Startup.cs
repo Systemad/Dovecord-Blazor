@@ -12,6 +12,7 @@ using System.Linq;
 using Dovecord.Server.Hubs;
 using Dovecord.Server.Services;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.OpenApi.Models;
 
 namespace Dovecord.Server
 {
@@ -44,6 +45,11 @@ namespace Dovecord.Server
                             .AllowAnyHeader();
                     });
             });
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            });
+            
             services.AddControllersWithViews();
             services.AddRazorPages();
             
@@ -66,7 +72,22 @@ namespace Dovecord.Server
                 app.UseHsts();
             }
 
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"); 
+            });
+            
             app.UseHttpsRedirection();
+           
+            /*app.UseCors(
+                options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
+            );
+            */
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
 
