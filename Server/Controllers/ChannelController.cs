@@ -15,7 +15,7 @@ namespace Dovecord.Server.Controllers
         private readonly ILogger<ChannelController> _logger;
         private ApplicationDbContext _applicationDbContext;
 
-        static readonly string[] scopeRequiredByApi = new string[] { "API.Access" };
+        static readonly string[] scopeRequiredByApi = new[] { "API.Access" };
      
         public ChannelController(ILogger<ChannelController> logger)
         {
@@ -24,7 +24,7 @@ namespace Dovecord.Server.Controllers
         }   
 
 
-        [HttpGet("channel/all")]
+        [HttpGet("all")]
         public IActionResult GetChannels()
         {
             HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);

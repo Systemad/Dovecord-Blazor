@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -45,16 +47,47 @@ namespace Dovecord.Server
                             .AllowAnyHeader();
                     });
             });
+            /*
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "swaggerAADdemo", Version = "v1" });
+                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme {  
+                    Type = SecuritySchemeType.OAuth2,  
+                    Flows = new OpenApiOAuthFlows() {  
+                        Implicit = new OpenApiOAuthFlow() {  
+                            AuthorizationUrl = new Uri("https://login.microsoftonline.com/b8c0dbd8-0eba-4961-b4d6-10b67c5710b6/oauth2/v2.0/authorize"),  
+                            TokenUrl = new Uri("https://login.microsoftonline.com/b8c0dbd8-0eba-4961-b4d6-10b67c5710b6/oauth2/v2.0/token"),  
+                            Scopes = new Dictionary < string, string > {  
+                                {  
+                                    "API.Access",  
+                                    "Reads the Weather forecast"  
+                                }  
+                            }  
+                        }  
+                    }  
+                });  
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement() {  
+                    {  
+                        new OpenApiSecurityScheme {  
+                            Reference = new OpenApiReference {  
+                                Type = ReferenceType.SecurityScheme,  
+                                Id = "oauth2"  
+                            },  
+                            Scheme = "oauth2",  
+                            Name = "oauth2",  
+                            In = ParameterLocation.Header  
+                        },  
+                        new List < string > ()  
+                    }  
+                }); 
             });
-            
+            */
             services.AddControllersWithViews();
             services.AddRazorPages();
             
             services.AddSignalR(options => options.EnableDetailedErrors = true)
                 .AddMessagePackProtocol();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,6 +97,17 @@ namespace Dovecord.Server
             {
                 app.UseDeveloperExceptionPage();
                 app.UseWebAssemblyDebugging();
+  
+                /*
+                app.UseSwagger();
+                app.UseSwaggerUI(c => {  
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AzureAD_OAuth_API v1");  
+                    //c.RoutePrefix = string.Empty;    
+                    c.OAuthClientId("68a431c8-84fd-4fbd-87c6-e3d3ddec67f1");  
+                    c.OAuthClientSecret("api://89be5e10-1770-45d7-813a-d47242ae2163/API.Access");  
+                    c.OAuthUseBasicAuthenticationWithAccessCodeGrant();  
+                });   
+                */
             }
             else
             {
@@ -72,22 +116,7 @@ namespace Dovecord.Server
                 app.UseHsts();
             }
 
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
-
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
-            // specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"); 
-            });
-            
             app.UseHttpsRedirection();
-           
-            /*app.UseCors(
-                options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
-            );
-            */
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
 
