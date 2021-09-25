@@ -73,7 +73,7 @@ namespace Dovecord.Client.Pages.Communication
         protected override async Task OnInitializedAsync()
         {
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(Nav.ToAbsoluteUri("/chat"),
+                .WithUrl(Nav.ToAbsoluteUri("/chathub"),
                     options => options.AccessTokenProvider =
                         async () => await GetAccessTokenValueAsync())
                 .WithAutomaticReconnect()
