@@ -47,7 +47,7 @@ namespace Dovecord.Server
                             .AllowAnyHeader();
                     });
             });
-            /*
+            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "swaggerAADdemo", Version = "v1" });
@@ -81,7 +81,7 @@ namespace Dovecord.Server
                     }  
                 }); 
             });
-            */
+            
             services.AddControllersWithViews();
             services.AddRazorPages();
             
@@ -98,7 +98,7 @@ namespace Dovecord.Server
                 app.UseDeveloperExceptionPage();
                 app.UseWebAssemblyDebugging();
   
-                /*
+                
                 app.UseSwagger();
                 app.UseSwaggerUI(c => {  
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "AzureAD_OAuth_API v1");  
@@ -107,7 +107,7 @@ namespace Dovecord.Server
                     c.OAuthClientSecret("api://89be5e10-1770-45d7-813a-d47242ae2163/API.Access");  
                     c.OAuthUseBasicAuthenticationWithAccessCodeGrant();  
                 });   
-                */
+                
             }
             else
             {

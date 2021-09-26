@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Timers;
 using Dovecord.Client.Extensions;
+using Dovecord.Client.Services;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -36,7 +38,8 @@ namespace Dovecord.Client.Pages.Communication
         string _messageId;
         string _message;
         bool _isTyping;
-
+        private List<Channel> _channels = new List<Channel>();
+        
         ActorCommand _lastCommand;
 
         [Parameter] public string _messageInput { get; set; }
@@ -62,6 +65,7 @@ namespace Dovecord.Client.Pages.Communication
 
         [Inject]
         public ILogger<Chat> Log { get; set; }
+        [Inject] private ChannelApi ChannelApi { get; set; }
 
         [Inject]
         public IAccessTokenProvider TokenProvider { get; set; }
@@ -97,6 +101,9 @@ namespace Dovecord.Client.Pages.Communication
             CurrentUsername = user.Identity.Name;
             //await UpdateClientVoices(
             //    await JavaScript.GetClientVoices(this));
+            //_channels = await ChannelApi.ChannelList();
+            
+            _channels = await Http.GetFromJsonAsync<List<Channel>>("https://localhost:5001/api/Channel/all");
         }
         
         async ValueTask<string> GetAccessTokenValueAsync()

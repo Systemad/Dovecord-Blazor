@@ -29,7 +29,7 @@ namespace Dovecord.Server.Services
                             // If the request is for our hub...
                             var path = context.HttpContext.Request.Path;
                             if (!string.IsNullOrEmpty(accessToken) &&
-                                (path.StartsWithSegments("/chat")))
+                                (path.StartsWithSegments("/chathub")))
                             {
                                 // Read the token out of the query string
                                 context.Token = accessToken;

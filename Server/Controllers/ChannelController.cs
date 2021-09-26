@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dovecord.Data;
+using Dovecord.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -25,12 +28,12 @@ namespace Dovecord.Server.Controllers
 
 
         [HttpGet("all")]
-        public IActionResult GetChannels()
+        public List<Channel> GetChannels()
         {
             HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
             
             var channels = _applicationDbContext.Channels.ToList();
-            return Ok(channels);
+            return channels;
         }
 
     }
