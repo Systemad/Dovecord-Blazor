@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RazorClassLib\RazorClassLib.csproj" />
     <ProjectReference Include="..\Shared\Dovecord.Shared.csproj" />
   </ItemGroup>
 
