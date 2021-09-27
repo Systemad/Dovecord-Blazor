@@ -26,11 +26,12 @@ namespace Dovecord.Server.Controllers
             _applicationDbContext = new DesignTimeDbContextFactory().CreateDbContext(null!);
         }   
 
-
+        
+        [AllowAnonymous]
         [HttpGet("all")]
         public List<Channel> GetChannels()
         {
-            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+            //HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
             
             var channels = _applicationDbContext.Channels.ToList();
             return channels;

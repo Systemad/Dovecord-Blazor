@@ -38,7 +38,8 @@ namespace Dovecord.Client.Pages.Communication
         string _messageId;
         string _message;
         bool _isTyping;
-        private List<Channel> _channels = new List<Channel>();
+        
+        public List<Channel> _channels { get; set; } = new List<Channel>();
         
         ActorCommand _lastCommand;
 

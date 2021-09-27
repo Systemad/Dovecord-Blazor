@@ -83,7 +83,7 @@
     @if (ChatDrawer == Anchor.Left)
     {
         <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Secondary" Class="mx-4 mt-6 mb-4">Create Channel</MudButton>
-        <ChatChannels />
+        <ChatChannels Channels="_channels" />
     }
     else if (ChatDrawer == Anchor.Right)
     {
