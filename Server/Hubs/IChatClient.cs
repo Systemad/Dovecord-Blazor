@@ -12,7 +12,7 @@ namespace Dovecord.Server.Hubs
 
         Task UserTyping(ActorAction action);
 
-        Task MessageReceived(ActorMessage message);
+        Task MessageReceived(ChannelMessage message);
 
         Task DeleteMessageReceived(string id);
 

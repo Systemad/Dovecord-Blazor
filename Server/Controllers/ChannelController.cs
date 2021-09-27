@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,14 +28,22 @@ namespace Dovecord.Server.Controllers
         }   
 
         
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpGet("all")]
         public List<Channel> GetChannels()
         {
-            //HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
             
             var channels = _applicationDbContext.Channels.ToList();
             return channels;
+        }
+
+        [AllowAnonymous]
+        [HttpGet("{channelId:guid}")]
+        public List<ChannelMessage> GetMessagesFromChannelid(Guid channelId)
+        {
+            var messages = _applicationDbContext.ChannelMessages.Where(a => a.ChannelId == channelId).ToList();
+            return messages;
         }
 
     }

@@ -108,6 +108,7 @@ namespace Dovecord.Server
                     c.OAuthUseBasicAuthenticationWithAccessCodeGrant();  
                 });   
                 
+                
             }
             else
             {

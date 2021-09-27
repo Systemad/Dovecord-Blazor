@@ -1,3 +1,4 @@
+@page "/chat/{CurrentChannelId}"
 @page "/chat"
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize]
@@ -6,7 +7,14 @@
     <MudHidden Breakpoint="Breakpoint.SmAndDown">
         <MudPaper Elevation="25" Class="pa-3 mr-6" MinWidth="250px">
             <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Secondary" FullWidth="true">Create Channel</MudButton>
-            <ChatChannels Channels="_channels" />
+            <MudList Clickable="true">
+                @{
+                        foreach (var channel in _channels)
+                        {
+                            <MudListItem Dense="true" OnClick="@(() =>LoadChannelChat(channel.Id.ToString()))"># @channel.ChannelName</MudListItem>
+                        }
+                    }
+            </MudList>
         </MudPaper>
     </MudHidden>
     <MudPaper Elevation="25" Class="py-4 flex-grow-1">
@@ -24,13 +32,26 @@
             </MudHidden>
         </MudToolBar>
         <div class="d-flex flex-column px-4" style="max-height:70vh; overflow:scroll;" id="chatContainer">
-            @foreach (var (id, message) in _messages)
-            {
-                <UserMessage Id="@id" ActorMessage="message" 
-                             DeleteMessage="@DeleteMessageById" 
-                             ActualUser="@CurrentUsername" 
-                             EditMessage="@StartEdit"/>
+            
+            @{
+                @if (_messages is null)
+                {
+                    <p>Loading...</p>
+                }
+                else
+                {
+                    @foreach (var message in _messages)
+                    {
+                        <UserMessage Id="@message.Id.ToString()" ActorMessage="message"
+                                     DeleteMessage="@DeleteMessageById"
+                                     ActualUser="@CurrentUsername"/>
+                            @*
+                             EditMessage="@StartEdit"/> *@
+                    }
+                }
             }
+            
+            
         </div>
         <MudPaper Elevation="0" Style="margin-left: 15px">
             @{

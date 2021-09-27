@@ -22,7 +22,8 @@ namespace Dovecord.Client.Pages.Communication
 {
     public partial class Chat : IAsyncDisposable
     {
-        readonly Dictionary<string, ActorMessage> _messages = new(StringComparer.OrdinalIgnoreCase);
+        //readonly Dictionary<string, ChannelMessage> _messages = new(StringComparer.OrdinalIgnoreCase);
+        List<ChannelMessage> _messages; // = new List<ChannelMessage>();
         readonly HashSet<Actor> _usersTyping = new();
         readonly HashSet<IDisposable> _hubRegistrations = new();
         readonly List<double> _voiceSpeeds =
@@ -67,6 +68,9 @@ namespace Dovecord.Client.Pages.Communication
         [Inject]
         public ILogger<Chat> Log { get; set; }
         [Inject] private ChannelApi ChannelApi { get; set; }
+        public Channel DefaultChannel { get; set; }
+        
+        [Parameter] public string CurrentChannelId { get; set; }
 
         [Inject]
         public IAccessTokenProvider TokenProvider { get; set; }
@@ -105,6 +109,11 @@ namespace Dovecord.Client.Pages.Communication
             //_channels = await ChannelApi.ChannelList();
             
             _channels = await Http.GetFromJsonAsync<List<Channel>>("https://localhost:5001/api/Channel/all");
+            DefaultChannel = _channels.First(a => a.ChannelName == "General");
+            Log.LogInformation($"Current chad it of general - {DefaultChannel.Id.ToString()}");
+            CurrentChannelId = DefaultChannel.Id.ToString();
+            await LoadChannelChat(DefaultChannel.Id.ToString());
+
         }
         
         async ValueTask<string> GetAccessTokenValueAsync()
@@ -113,19 +122,20 @@ namespace Dovecord.Client.Pages.Communication
             return result.TryGetToken(out var accessToken) ? accessToken.Value : null;
         }
 
-        async Task OnDeleteMessageReceived(string messageId) => await InvokeAsync(async () =>
+        async Task OnDeleteMessageReceived(Guid messageId) => await InvokeAsync(async () =>
         {
-            _messages.Remove(messageId);
+            _messages.Remove(_messages.First(a => a.Id == messageId));
             StateHasChanged();
         });
         
-        async Task OnMessageReceivedAsync(ActorMessage message) =>
+        async Task OnMessageReceivedAsync(ChannelMessage message) =>
             await InvokeAsync(
                 async () =>
                 {
-                    _messages[message.Id] = message;
+                    //_messages[message.Id] = message;
+                    _messages.Add(message);
                     //_messages.Add(message.Id, message);
-                    Console.WriteLine($" Client - {message.Id} - {message.Text} - {message.User}");
+                    Console.WriteLine($" Client - {message.Id} - {message.Content} - {message.User}");
                     /*
                     if (message.IsChatBot && message.SayJoke)
                     {
@@ -182,8 +192,9 @@ namespace Dovecord.Client.Pages.Communication
         {
             if (_messageInput is { Length: > 0 })
             {
-                await _hubConnection.InvokeAsync("PostMessage", _messageInput, _messageId);
+                await _hubConnection.InvokeAsync("PostMessage", _messageInput, DefaultChannel.Id.ToString()); //, _messageId);
 
+                //var hello = _messageInput;
                 _messageInput = null;
                 _messageId = null;
 
@@ -217,9 +228,10 @@ namespace Dovecord.Client.Pages.Communication
             await SetIsTyping(false);
         }
 
-        async Task StartEdit(ActorMessage message)
+        /*
+        async Task StartEdit(ChannelMessage message)
         {
-            if (message.User != CurrentUsername)
+            if (message.Username != CurrentUsername)
             {
                 return;
             }
@@ -232,10 +244,10 @@ namespace Dovecord.Client.Pages.Communication
                     StateHasChanged();
                 });
         }   
-        
-        async Task DeleteMessageById(ActorMessage message)
+        */
+        async Task DeleteMessageById(ChannelMessage message)
         {
-            if (message.User != CurrentUsername)
+            if (message.Username != CurrentUsername)
             {
                 Console.WriteLine("Message not owned by user");
                 return;
@@ -246,7 +258,12 @@ namespace Dovecord.Client.Pages.Communication
                 await _hubConnection.InvokeAsync("DeleteMessageById", message.Id);
             });
         }
-        
+
+        async Task LoadChannelChat(string channel)
+        {
+            _messages = await Http.GetFromJsonAsync<List<ChannelMessage>>($"https://localhost:5001/api/Channel/{channel}");
+        }
+
         public async ValueTask DisposeAsync()
         {
             if (_debouceTimer is { })

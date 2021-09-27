@@ -8,11 +8,11 @@ namespace Dovecord.Client.Extensions
     public static class HubConnectionExtensions
     {
         public static IDisposable OnMessageReceived(
-            this HubConnection connection, Func<ActorMessage, Task> handler) =>
+            this HubConnection connection, Func<ChannelMessage, Task> handler) =>
             connection.On("MessageReceived", handler);
         
         public static IDisposable OnDeleteMessageReceived(
-            this HubConnection connection, Func<string, Task> handler) =>
+            this HubConnection connection, Func<Guid, Task> handler) =>
             connection.On("DeleteMessageReceived", handler);
 
         public static IDisposable OnUserLoggedOn(

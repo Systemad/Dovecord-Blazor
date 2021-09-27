@@ -32,10 +32,13 @@ namespace Dovecord.Server.Hubs
             await Clients.Caller.MessageReceived(
                 new ActorMessage(
                     "greeting", string.Format(LoginGreetingsFormat, Username), "👋", IsGreeting: true));
-            */ 
+            */
+
+            /*
             await Clients.Caller.MessageReceived(
                 new ActorMessage(
                     "greeting", $"Hello, {Username}!", "👋", IsGreeting: true));
+                    */
 
             //await Clients.All.SendConnectedUsers(_connections.GetConnections());
             
@@ -48,7 +51,7 @@ namespace Dovecord.Server.Hubs
             await Clients.Others.UserLoggedOff(new Actor(Username));
         }
 
-        public async Task PostMessage(string message, string id = null!)
+        public async Task PostMessage(string message, string channelId)
         {
             /*
             if (_commandSignal.IsRecognizedCommand(Username, message, out var command) &&
@@ -58,10 +61,23 @@ namespace Dovecord.Server.Hubs
                 return;
             }
             */
+
+            //ActorMessage mess = new ActorMessage(UseOrCreateId(id), message, Username, IsEdit: id is not null);
+            //Console.WriteLine($" Server - {mess.Id} - {mess.Text} - {mess.User}");
+
+            var channelmessage = new ChannelMessage
+            {
+                Id = Guid.NewGuid(),
+                Content = message,
+                CreatedAt = DateTime.Now,
+                IsEdit = false,
+                Username = Username,
+                UserId = Guid.Parse(UserId),
+                ChannelId = Guid.Parse(channelId),
+            };
             
-            ActorMessage mess = new ActorMessage(UseOrCreateId(id), message, Username, IsEdit: id is not null);
-            Console.WriteLine($" Server - {mess.Id} - {mess.Text} - {mess.User}");
-            await Clients.All.MessageReceived(mess);
+            
+            await Clients.All.MessageReceived(channelmessage);
             
             //await Clients.All.MessageReceived(
                 //new ActorMessage(UseOrCreateId(id), message, Username, IsEdit: id is not null));
