@@ -22,8 +22,7 @@ namespace Dovecord.Client.Pages.Communication
 {
     public partial class Chat : IAsyncDisposable
     {
-        //readonly Dictionary<string, ChannelMessage> _messages = new(StringComparer.OrdinalIgnoreCase);
-        List<ChannelMessage> _messages; // = new List<ChannelMessage>();
+        List<ChannelMessage> _messages;
         readonly HashSet<Actor> _usersTyping = new();
         readonly HashSet<IDisposable> _hubRegistrations = new();
         readonly List<double> _voiceSpeeds =
@@ -34,6 +33,7 @@ namespace Dovecord.Client.Pages.Communication
             AutoReset = false
         };
         
+        public Channel DefaultChannel { get; set; }
         HubConnection _hubConnection;
 
         string _messageId;
@@ -53,24 +53,14 @@ namespace Dovecord.Client.Pages.Communication
             _debouceTimer.Elapsed +=
                 async (sender, args) => await SetIsTyping(false);
 
-        [Parameter]
-        public ClaimsPrincipal User { get; set; }
-
-        [Inject]
-        public NavigationManager Nav { get; set; }
-
-        [Inject]
-        public IJSRuntime JavaScript { get; set; }
-
-        [Inject]
-        public HttpClient Http { get; set; }
-
-        [Inject]
-        public ILogger<Chat> Log { get; set; }
+        [Parameter] public ClaimsPrincipal User { get; set; } 
+        [Inject] public NavigationManager Nav { get; set; }
+        [Inject] public IJSRuntime JavaScript { get; set; }
+        [Inject] public HttpClient Http { get; set; }
+        [Inject] public ILogger<Chat> Log { get; set; }
         [Inject] private ChannelApi ChannelApi { get; set; }
-        public Channel DefaultChannel { get; set; }
-        
-        [Parameter] public string CurrentChannelId { get; set; }
+
+        [Parameter] public Guid CurrentChannelId { get; set; }
 
         [Inject]
         public IAccessTokenProvider TokenProvider { get; set; }
@@ -107,12 +97,12 @@ namespace Dovecord.Client.Pages.Communication
             //await UpdateClientVoices(
             //    await JavaScript.GetClientVoices(this));
             //_channels = await ChannelApi.ChannelList();
-            
-            _channels = await Http.GetFromJsonAsync<List<Channel>>("https://localhost:5001/api/Channel/all");
+
+            _channels = await ChannelApi.ChannelList();
             DefaultChannel = _channels.First(a => a.ChannelName == "General");
             Log.LogInformation($"Current chad it of general - {DefaultChannel.Id.ToString()}");
-            CurrentChannelId = DefaultChannel.Id.ToString();
-            await LoadChannelChat(DefaultChannel.Id.ToString());
+            CurrentChannelId = DefaultChannel.Id;;
+            await LoadChannelChat(DefaultChannel.Id);
 
         }
         
@@ -192,9 +182,7 @@ namespace Dovecord.Client.Pages.Communication
         {
             if (_messageInput is { Length: > 0 })
             {
-                await _hubConnection.InvokeAsync("PostMessage", _messageInput, DefaultChannel.Id.ToString()); //, _messageId);
-
-                //var hello = _messageInput;
+                await _hubConnection.InvokeAsync("PostMessage", _messageInput, DefaultChannel.Id);
                 _messageInput = null;
                 _messageId = null;
 
@@ -259,9 +247,9 @@ namespace Dovecord.Client.Pages.Communication
             });
         }
 
-        async Task LoadChannelChat(string channel)
+        async Task LoadChannelChat(Guid channel)
         {
-            _messages = await Http.GetFromJsonAsync<List<ChannelMessage>>($"https://localhost:5001/api/Channel/{channel}");
+            _messages = await ChannelApi.MessagesFomChannelId(channel);
         }
 
         public async ValueTask DisposeAsync()

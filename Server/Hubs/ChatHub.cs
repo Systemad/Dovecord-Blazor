@@ -51,7 +51,7 @@ namespace Dovecord.Server.Hubs
             await Clients.Others.UserLoggedOff(new Actor(Username));
         }
 
-        public async Task PostMessage(string message, string channelId)
+        public async Task PostMessage(string message, Guid channelId)
         {
             /*
             if (_commandSignal.IsRecognizedCommand(Username, message, out var command) &&
@@ -73,7 +73,7 @@ namespace Dovecord.Server.Hubs
                 IsEdit = false,
                 Username = Username,
                 UserId = Guid.Parse(UserId),
-                ChannelId = Guid.Parse(channelId),
+                ChannelId = channelId,
             };
             
             

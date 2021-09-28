@@ -11,7 +11,7 @@
                 @{
                         foreach (var channel in _channels)
                         {
-                            <MudListItem Dense="true" OnClick="@(() =>LoadChannelChat(channel.Id.ToString()))"># @channel.ChannelName</MudListItem>
+                            <MudListItem Dense="true" OnClick="@(() =>LoadChannelChat(channel.Id))"># @channel.ChannelName</MudListItem>
                         }
                     }
             </MudList>

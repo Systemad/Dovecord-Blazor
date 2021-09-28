@@ -38,7 +38,7 @@ namespace Dovecord.Server.Controllers
             return channels;
         }
 
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [HttpGet("{channelId:guid}")]
         public List<ChannelMessage> GetMessagesFromChannelid(Guid channelId)
         {
