@@ -39,11 +39,8 @@ namespace Dovecord.Client.Pages.Communication
         string _messageId;
         string _message;
         bool _isTyping;
-        
         public List<Channel> _channels { get; set; } = new List<Channel>();
-        
         ActorCommand _lastCommand;
-
         [Parameter] public string _messageInput { get; set; }
         //List<SpeechSynthesisVoice> _voices;
         string _voice = "Auto";
@@ -52,9 +49,7 @@ namespace Dovecord.Client.Pages.Communication
         public Chat() =>
             _debouceTimer.Elapsed +=
                 async (sender, args) => await SetIsTyping(false);
-
-        [Parameter] public ClaimsPrincipal User { get; set; } 
-        [Inject] public NavigationManager Nav { get; set; }
+        
         [Inject] public IJSRuntime JavaScript { get; set; }
         [Inject] public HttpClient Http { get; set; }
         [Inject] public ILogger<Chat> Log { get; set; }
@@ -72,7 +67,7 @@ namespace Dovecord.Client.Pages.Communication
         protected override async Task OnInitializedAsync()
         {
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl(Nav.ToAbsoluteUri("/chathub"),
+                .WithUrl(_navigationManager.ToAbsoluteUri("/chathub"),
                     options => options.AccessTokenProvider =
                         async () => await GetAccessTokenValueAsync())
                 .WithAutomaticReconnect()
@@ -91,7 +86,7 @@ namespace Dovecord.Client.Pages.Communication
 
             await _hubConnection.StartAsync();
 
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
             CurrentUsername = user.Identity.Name;
             //await UpdateClientVoices(
@@ -162,9 +157,7 @@ namespace Dovecord.Client.Pages.Communication
                 Log.LogInformation($"Client receive user typing method: {actorAction.IsTyping}");
                 StateHasChanged();
             });
-        
-        bool OwnsMessage(string user) => User.Identity.Name == user;
-        
+
         async Task OnKeyUp(KeyboardEventArgs args)
         {
             if (args is { Key: "Enter" } and { Code: "Enter" })

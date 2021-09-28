@@ -9,7 +9,10 @@
 @using Microsoft.JSInterop
 @using Dovecord.Client
 @using Dovecord.Client.Shared
+@using Microsoft.AspNetCore.Authorization
 @using MudBlazor
 @using RazorClassLib
 @using Pages.Communication
-@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject NavigationManager _navigationManager
+@attribute [Authorize]
