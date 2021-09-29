@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Timers;
 using Dovecord.Client.Extensions;
@@ -16,7 +14,6 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Dovecord.Client.Pages.Communication
 {
@@ -25,21 +22,18 @@ namespace Dovecord.Client.Pages.Communication
         List<ChannelMessage> _messages;
         readonly HashSet<Actor> _usersTyping = new();
         readonly HashSet<IDisposable> _hubRegistrations = new();
-        readonly List<double> _voiceSpeeds =
-            Enumerable.Range(0, 12).Select(i => (i + 1) * .25).ToList();
-        readonly Timer _debouceTimer = new()
+        readonly Timer _debounceTimer = new()
         {
             Interval = 750,
             AutoReset = false
         };
-        
-        public Channel DefaultChannel { get; set; }
+
+        private Channel DefaultChannel { get; set; }
         HubConnection _hubConnection;
 
         string _messageId;
-        string _message;
         bool _isTyping;
-        public List<Channel> _channels { get; set; } = new List<Channel>();
+        private List<Channel> Channels { get; set; } = new List<Channel>();
         ActorCommand _lastCommand;
         [Parameter] public string _messageInput { get; set; }
         //List<SpeechSynthesisVoice> _voices;
@@ -47,7 +41,7 @@ namespace Dovecord.Client.Pages.Communication
         double _voiceSpeed = 1;
         
         public Chat() =>
-            _debouceTimer.Elapsed +=
+            _debounceTimer.Elapsed +=
                 async (sender, args) => await SetIsTyping(false);
         
         [Inject] public IJSRuntime JavaScript { get; set; }
@@ -88,15 +82,12 @@ namespace Dovecord.Client.Pages.Communication
 
             var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
-            CurrentUsername = user.Identity.Name;
-            //await UpdateClientVoices(
-            //    await JavaScript.GetClientVoices(this));
-            //_channels = await ChannelApi.ChannelList();
-
-            _channels = await ChannelApi.ChannelList();
-            DefaultChannel = _channels.First(a => a.ChannelName == "General");
+            CurrentUsername = user.Identity?.Name;
+            
+            Channels = await ChannelApi.ChannelList();
+            DefaultChannel = Channels.First(a => a.ChannelName == "General");
             Log.LogInformation($"Current chad it of general - {DefaultChannel.Id.ToString()}");
-            CurrentChannelId = DefaultChannel.Id;;
+            CurrentChannelId = DefaultChannel.Id;
             await LoadChannelChat(DefaultChannel.Id);
 
         }
@@ -110,39 +101,16 @@ namespace Dovecord.Client.Pages.Communication
         async Task OnDeleteMessageReceived(Guid messageId) => await InvokeAsync(async () =>
         {
             _messages.Remove(_messages.First(a => a.Id == messageId));
+            await JavaScript.ScrollIntoViewAsync();
             StateHasChanged();
         });
-        
-        async Task OnMessageReceivedAsync(ChannelMessage message) =>
+
+        private async Task OnMessageReceivedAsync(ChannelMessage message) =>
             await InvokeAsync(
                 async () =>
                 {
-                    //_messages[message.Id] = message;
                     _messages.Add(message);
-                    //_messages.Add(message.Id, message);
-                    Console.WriteLine($" Client - {message.Id} - {message.Content} - {message.User}");
-                    /*
-                    if (message.IsChatBot && message.SayJoke)
-                    {
-                        var lang = message.Lang;
-                        var voice = _voices?.FirstOrDefault(v => v.Name == _voice);
-                        if (voice is not null)
-                        {
-                            if (!voice.Lang.StartsWith(lang))
-                            {
-                                var firstLocaleMatchingVoice = _voices.FirstOrDefault(v => v.Lang.StartsWith(lang));
-                                if (firstLocaleMatchingVoice is not null)
-                                {
-                                    lang = firstLocaleMatchingVoice.Lang[0..2];
-                                }
-                            }
-                        }
-
-                        //await JavaScript.SpeakAsync(message.Text, _voice, _voiceSpeed, lang);
-                    }
-
                     await JavaScript.ScrollIntoViewAsync();
-                    */
                     StateHasChanged();
                 });
         
@@ -167,7 +135,7 @@ namespace Dovecord.Client.Pages.Communication
 
             if (args is { Key: "ArrowUp" } && _lastCommand is not null)
             {
-                _message = _lastCommand.OriginalText;
+                _messageInput = _lastCommand.OriginalText;
             }
         }
         
@@ -185,8 +153,8 @@ namespace Dovecord.Client.Pages.Communication
         
         async Task InitiateDebounceUserIsTyping()
         {
-            _debouceTimer.Stop();
-            _debouceTimer.Start();
+            _debounceTimer.Stop();
+            _debounceTimer.Start();
 
             await SetIsTyping(true);
         }
@@ -205,7 +173,7 @@ namespace Dovecord.Client.Pages.Communication
 
         async Task AppendToMessage(string text)
         {
-            _message += text;
+            _messageInput += text;
             await SetIsTyping(false);
         }
 
@@ -247,10 +215,10 @@ namespace Dovecord.Client.Pages.Communication
 
         public async ValueTask DisposeAsync()
         {
-            if (_debouceTimer is { })
+            if (_debounceTimer is { })
             {
-                _debouceTimer.Stop();
-                _debouceTimer.Dispose();
+                _debounceTimer.Stop();
+                _debounceTimer.Dispose();
             }
 
             if (_hubRegistrations is { Count: > 0 })
