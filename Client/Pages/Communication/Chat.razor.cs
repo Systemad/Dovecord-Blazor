@@ -28,7 +28,9 @@ namespace Dovecord.Client.Pages.Communication
             AutoReset = false
         };
 
-        private Channel DefaultChannel { get; set; }
+        private Channel CurrentChannel { get; set; }
+        private Channel LastChannel { get; set; }
+        
         HubConnection _hubConnection;
 
         string _messageId;
@@ -49,7 +51,6 @@ namespace Dovecord.Client.Pages.Communication
         [Inject] public ILogger<Chat> Log { get; set; }
         [Inject] private ChannelApi ChannelApi { get; set; }
 
-        [Parameter] public Guid CurrentChannelId { get; set; }
 
         [Inject]
         public IAccessTokenProvider TokenProvider { get; set; }
@@ -57,7 +58,7 @@ namespace Dovecord.Client.Pages.Communication
         private string isTypingMarkup;
         private string placeholder;
         private string CurrentUsername;
-        
+
         protected override async Task OnInitializedAsync()
         {
             _hubConnection = new HubConnectionBuilder()
@@ -85,10 +86,9 @@ namespace Dovecord.Client.Pages.Communication
             CurrentUsername = user.Identity?.Name;
             
             Channels = await ChannelApi.ChannelList();
-            DefaultChannel = Channels.First(a => a.ChannelName == "General");
-            Log.LogInformation($"Current chad it of general - {DefaultChannel.Id.ToString()}");
-            CurrentChannelId = DefaultChannel.Id;
-            await LoadChannelChat(DefaultChannel.Id);
+            CurrentChannel = Channels.First(a => a.ChannelName == "General");
+            Log.LogInformation($"Current chad it of general - {CurrentChannel.Id.ToString()}");
+            await LoadChannelChat(CurrentChannel);
 
         }
         
@@ -143,7 +143,7 @@ namespace Dovecord.Client.Pages.Communication
         {
             if (_messageInput is { Length: > 0 })
             {
-                await _hubConnection.InvokeAsync("PostMessage", _messageInput, DefaultChannel.Id);
+                await _hubConnection.InvokeAsync("PostMessage", _messageInput, CurrentChannel.Id);
                 _messageInput = null;
                 _messageId = null;
 
@@ -176,7 +176,7 @@ namespace Dovecord.Client.Pages.Communication
             _messageInput += text;
             await SetIsTyping(false);
         }
-
+        
         /*
         async Task StartEdit(ChannelMessage message)
         {
@@ -208,9 +208,12 @@ namespace Dovecord.Client.Pages.Communication
             });
         }
 
-        async Task LoadChannelChat(Guid channel)
+        async Task LoadChannelChat(Channel channel)
         {
-            _messages = await ChannelApi.MessagesFomChannelId(channel);
+            await _hubConnection.InvokeAsync("RemoveChannelById", CurrentChannel.Id);
+            await _hubConnection.InvokeAsync("JoinChannelById", channel.Id);
+            _messages = await ChannelApi.MessagesFomChannelId(channel.Id);
+            CurrentChannel = channel;
         }
 
         public async ValueTask DisposeAsync()

@@ -41,6 +41,16 @@ namespace Dovecord.Data
                 //ServerId = serverguid,
                 //Server = null
             });
+            
+            modelBuilder.Entity<Channel>().HasData(new Channel
+            {
+                Id = Guid.NewGuid(),
+                //Guid = Guid.NewGuid().ToString(),
+                ChannelName = "Random",
+                //ChannelMessages = null,
+                //ServerId = serverguid,
+                //Server = null
+            });
 
             
             modelBuilder.Entity<User>().HasData(new User

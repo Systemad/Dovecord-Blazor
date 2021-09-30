@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dovecord.Shared;
 
@@ -16,6 +17,7 @@ namespace Dovecord.Server.Hubs
 
         Task DeleteMessageReceived(string id);
 
+        Task AddToChannel(Guid channelId, Guid userId);
         //Task SendConnectedUsers(IEnumerable<string> users);
 
 

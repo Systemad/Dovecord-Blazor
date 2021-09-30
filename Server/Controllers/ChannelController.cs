@@ -39,12 +39,6 @@ namespace Dovecord.Server.Controllers
         }
 
         //[AllowAnonymous]
-        [HttpGet("{channelId:guid}")]
-        public List<ChannelMessage> GetMessagesFromChannelid(Guid channelId)
-        {
-            var messages = _applicationDbContext.ChannelMessages.Where(a => a.ChannelId == channelId).ToList();
-            return messages;
-        }
 
     }
 }

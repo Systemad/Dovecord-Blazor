@@ -12,7 +12,7 @@ namespace Dovecord.Client.Services
         [Get("/Channel/all")]
         Task<List<Channel>> ChannelList();
 
-        [Get("/Channel/{id}")]
+        [Get("/Chat/{id}")]
         Task<List<ChannelMessage>> MessagesFomChannelId(Guid id);
     }
 }

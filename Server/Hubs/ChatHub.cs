@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Dovecord.Client.Pages.Communication;
 using Dovecord.Data;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.Authorization;
@@ -16,6 +17,13 @@ namespace Dovecord.Server.Hubs
         
         private static readonly ConnectionMapping<string> _connections = 
             new ConnectionMapping<string>();
+        
+        private ApplicationDbContext _context;
+
+        public ChatHub()
+        {
+            _context = new DesignTimeDbContextFactory().CreateDbContext(null!);
+        }
         //readonly ICommandSignalService _commandSignal;
         
         string Username => Context?.User?.Identity?.Name ?? "Unknown";
@@ -26,7 +34,7 @@ namespace Dovecord.Server.Hubs
         public override async Task OnConnectedAsync()
         {
             
-            Console.WriteLine(Username);
+            Console.WriteLine($"{UserId} -  {Context.ConnectionId}");
             _connections.Add(Username, Context.ConnectionId);
             /*
             await Clients.Caller.MessageReceived(
@@ -53,18 +61,6 @@ namespace Dovecord.Server.Hubs
 
         public async Task PostMessage(string message, Guid channelId)
         {
-            /*
-            if (_commandSignal.IsRecognizedCommand(Username, message, out var command) &&
-                command is not null)
-            {
-                await Clients.Caller.CommandSignalReceived(command);
-                return;
-            }
-            */
-
-            //ActorMessage mess = new ActorMessage(UseOrCreateId(id), message, Username, IsEdit: id is not null);
-            //Console.WriteLine($" Server - {mess.Id} - {mess.Text} - {mess.User}");
-
             var channelmessage = new ChannelMessage
             {
                 Id = Guid.NewGuid(),
@@ -75,10 +71,9 @@ namespace Dovecord.Server.Hubs
                 UserId = Guid.Parse(UserId),
                 ChannelId = channelId,
             };
-            
-            
-            await Clients.All.MessageReceived(channelmessage);
-            
+            await Clients.Group(channelId.ToString()).MessageReceived(channelmessage);
+            _context.ChannelMessages.Add(channelmessage);
+            await _context.SaveChangesAsync();
             //await Clients.All.MessageReceived(
                 //new ActorMessage(UseOrCreateId(id), message, Username, IsEdit: id is not null));
         }
@@ -90,7 +85,19 @@ namespace Dovecord.Server.Hubs
         public async Task UserTyping(bool isTyping)
             => await Clients.Others.UserTyping(new ActorAction(Username, isTyping));
 
-        static string UseOrCreateId(string id)
-            => string.IsNullOrWhiteSpace(id) ? Guid.NewGuid().ToString() : id;
+
+        
+        public async Task JoinChannelById(Guid channelId)
+        {
+            Console.Write($"Joined channel - {channelId.ToString()}");
+            await Groups.AddToGroupAsync(Context.ConnectionId, channelId.ToString());
+        }
+        
+        public async Task RemoveChannelById(Guid channelId)
+        {
+            Console.Write($"Left channel - {channelId.ToString()}");
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, channelId.ToString());
+        }
+        
     }
 }

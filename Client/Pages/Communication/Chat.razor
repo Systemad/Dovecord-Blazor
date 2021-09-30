@@ -1,14 +1,13 @@
-@page "/chat/{CurrentChannelId}"
 @page "/chat"
 <div class="d-flex flex-grow-1 flex-row" style="max-height:88vH;min-height:88vH">
     <MudHidden Breakpoint="Breakpoint.SmAndDown">
-        <MudPaper Elevation="25" Class="pa-3 mr-6" MinWidth="250px">
+        <MudPaper Justif Elevation="25" Class="pa-3 mr-6" MinWidth="250px">
             <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Secondary" FullWidth="true">Create Channel</MudButton>
             <MudList Clickable="true">
                 @{
                         foreach (var channel in Channels)
                         {
-                            <MudListItem Dense="true" OnClick="@(() =>LoadChannelChat(channel.Id))"># @channel.ChannelName</MudListItem>
+                            <MudListItem Dense="true" OnClick="@(() =>LoadChannelChat(channel))"># @channel.ChannelName</MudListItem>
                         }
                     }
             </MudList>
@@ -33,7 +32,7 @@
             @{
                 @if (_messages is null)
                 {
-                    <p>Loading...</p>
+                    <LoadingMessage />
                 }
                 else
                 {
