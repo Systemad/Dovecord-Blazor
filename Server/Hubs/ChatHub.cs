@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Dovecord.Client.Pages.Communication;
@@ -27,29 +28,18 @@ namespace Dovecord.Server.Hubs
         //readonly ICommandSignalService _commandSignal;
         
         string Username => Context?.User?.Identity?.Name ?? "Unknown";
-        private string UserId => Context?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        Guid UserId => Guid.Parse(Context?.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-        //public ChatHub(ICommandSignalService commandSignal) => _commandSignal = commandSignal;
 
         public override async Task OnConnectedAsync()
         {
             
-            Console.WriteLine($"{UserId} -  {Context.ConnectionId}");
-            _connections.Add(Username, Context.ConnectionId);
-            /*
-            await Clients.Caller.MessageReceived(
-                new ActorMessage(
-                    "greeting", string.Format(LoginGreetingsFormat, Username), "👋", IsGreeting: true));
-            */
-
-            /*
-            await Clients.Caller.MessageReceived(
-                new ActorMessage(
-                    "greeting", $"Hello, {Username}!", "👋", IsGreeting: true));
-                    */
-
-            //await Clients.All.SendConnectedUsers(_connections.GetConnections());
-            
+            if (!_context.Users.Any(u => u.Id == UserId))
+            {
+                Console.WriteLine($"user does not exist . {Username}");
+                _context.Users.Add(CreateUser());
+                await _context.SaveChangesAsync();
+            }
             await Clients.Others.UserLoggedOn(new Actor(Username));
         }
 
@@ -68,14 +58,12 @@ namespace Dovecord.Server.Hubs
                 CreatedAt = DateTime.Now,
                 IsEdit = false,
                 Username = Username,
-                UserId = Guid.Parse(UserId),
+                UserId = UserId,
                 ChannelId = channelId,
             };
             await Clients.Group(channelId.ToString()).MessageReceived(channelmessage);
             _context.ChannelMessages.Add(channelmessage);
             await _context.SaveChangesAsync();
-            //await Clients.All.MessageReceived(
-                //new ActorMessage(UseOrCreateId(id), message, Username, IsEdit: id is not null));
         }
 
         public async Task DeleteMessageById(string messageId)
@@ -84,8 +72,6 @@ namespace Dovecord.Server.Hubs
         }
         public async Task UserTyping(bool isTyping)
             => await Clients.Others.UserTyping(new ActorAction(Username, isTyping));
-
-
         
         public async Task JoinChannelById(Guid channelId)
         {
@@ -98,6 +84,12 @@ namespace Dovecord.Server.Hubs
             Console.Write($"Left channel - {channelId.ToString()}");
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, channelId.ToString());
         }
-        
+
+        private User CreateUser() => new()
+        {
+            Id = UserId,
+            Username = Username,
+        };
+
     }
 }

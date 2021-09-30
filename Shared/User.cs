@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Dovecord.Shared
 {
+    // TODO: Populate with user info 
     
     public class User
     {
