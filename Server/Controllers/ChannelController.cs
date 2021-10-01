@@ -21,10 +21,10 @@ namespace Dovecord.Server.Controllers
 
         static readonly string[] scopeRequiredByApi = new[] { "API.Access" };
      
-        public ChannelController(ILogger<ChannelController> logger)
+        public ChannelController(ILogger<ChannelController> logger, ApplicationDbContext applicationDbContext)
         {
             _logger = logger;
-            _applicationDbContext = new DesignTimeDbContextFactory().CreateDbContext(null!);
+            _applicationDbContext = applicationDbContext;
         }   
 
         
@@ -37,8 +37,19 @@ namespace Dovecord.Server.Controllers
             var channels = _applicationDbContext.Channels.ToList();
             return channels;
         }
-
-        //[AllowAnonymous]
-
+        
+        [HttpPut("create/{name}")]
+        public IActionResult CreateChannel([FromRoute]string name)
+        {
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+            var channel = new Channel
+            {
+                Id = Guid.NewGuid(),
+                ChannelName = name,
+            };
+            _applicationDbContext.Channels.Add(channel);
+            _applicationDbContext.SaveChangesAsync();
+            return Ok($"Channel {name} created");
+        }
     }
 }

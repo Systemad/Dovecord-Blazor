@@ -49,7 +49,7 @@ namespace Dovecord.Client.Pages.Communication
         [Inject] public IJSRuntime JavaScript { get; set; }
         [Inject] public HttpClient Http { get; set; }
         [Inject] public ILogger<Chat> Log { get; set; }
-        [Inject] private ChannelApi ChannelApi { get; set; }
+        [Inject] private IChannelApi ChannelApi { get; set; }
 
 
         [Inject]
@@ -159,6 +159,7 @@ namespace Dovecord.Client.Pages.Communication
             await SetIsTyping(true);
         }
         
+        // TODO: Only display in current channel (possible fix? current channel id as parameter in url)
         async Task SetIsTyping(bool isTyping)
         {
             if (_isTyping && isTyping)
@@ -205,6 +206,7 @@ namespace Dovecord.Client.Pages.Communication
             await InvokeAsync(async () =>
             {
                 await _hubConnection.InvokeAsync("DeleteMessageById", message.Id);
+                await ChannelApi.DeleteMessageById(message.Id);
             });
         }
 

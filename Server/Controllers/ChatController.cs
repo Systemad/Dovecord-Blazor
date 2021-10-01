@@ -17,14 +17,14 @@ namespace Dovecord.Server.Controllers
     public class ChatController : ControllerBase
     {
         private readonly ILogger<ChatController> _logger;
-        private ApplicationDbContext _applicationDbContext;
+        private ApplicationDbContext _context;
 
         static readonly string[] scopeRequiredByApi = new[] { "API.Access" };
      
         public ChatController(ILogger<ChatController> logger)
         {
             _logger = logger;
-            _applicationDbContext = new DesignTimeDbContextFactory().CreateDbContext(null!);
+            _context = new DesignTimeDbContextFactory().CreateDbContext(null!);
         }
 
         [AllowAnonymous]
@@ -32,32 +32,24 @@ namespace Dovecord.Server.Controllers
         public async Task SaveMessageToChannel(ChannelMessage message)
         {
             var channel =
-                _applicationDbContext.Channels.Include(a => a.ChannelMessages).First();
-
-            /*
-            var newmessage = new ChannelMessage
-            {
-                Id = Guid.NewGuid(),
-                Content = message.Content,
-                CreatedAt = DateTime.Now,
-                IsEdit = false,
-                Username = ,
-                UserId = default,
-                User = null,
-                ChannelId = default,
-                Channel = null
-            };
-            */
-
+                _context.Channels.Include(a => a.ChannelMessages).First();
             channel.ChannelMessages.Add(message); //.Where(id => id.Id == guid);
-            await _applicationDbContext.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
         
         [HttpGet("{channelId:guid}")]
         public List<ChannelMessage> GetMessagesFromChannelid(Guid channelId)
         {
-            var messages = _applicationDbContext.ChannelMessages.Where(a => a.ChannelId == channelId).ToList();
+            var messages = _context.ChannelMessages.Where(a => a.ChannelId == channelId).ToList();
             return messages;
+        }
+        
+        [HttpDelete("delete/{messageId:guid}")]
+        public async Task DeleteMessageBy(Guid messageId)
+        {
+            var message = _context.ChannelMessages.FindAsync(messageId);
+            _context.ChannelMessages.Remove(await message);
+            await _context.SaveChangesAsync();
         }
         
     }

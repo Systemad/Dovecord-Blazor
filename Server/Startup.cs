@@ -11,9 +11,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
+using Dovecord.Data;
 using Dovecord.Server.Hubs;
 using Dovecord.Server.Services;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 namespace Dovecord.Server
@@ -34,7 +36,9 @@ namespace Dovecord.Server
         {
             //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             //    .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAdB2C"));
-            
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlite("Data Source=C:\\Users\\yeahg\\source\\repos\\Dovecord\\Dovecord.Data\\DovecordHQ.db")
+            );
             services.AddAppAuthentication(Configuration);
             services.AddCors(options =>
             {
