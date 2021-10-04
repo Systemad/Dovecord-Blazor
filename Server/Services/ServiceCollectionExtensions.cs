@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Dovecord.Data.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,13 @@ namespace Dovecord.Server.Services
                     };
                 });
 
+            return services;
+        }
+        
+        internal static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        {
+            services.AddTransient<IChatService, ChatService>();
+            services.AddTransient<IUserService, UserService>();
             return services;
         }
     }

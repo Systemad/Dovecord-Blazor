@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Timers;
 using Dovecord.Client.Extensions;
 using Dovecord.Client.Services;
 using Dovecord.Shared;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
@@ -50,6 +53,7 @@ namespace Dovecord.Client.Pages.Communication
         [Inject] public HttpClient Http { get; set; }
         [Inject] public ILogger<Chat> Log { get; set; }
         [Inject] private IChannelApi ChannelApi { get; set; }
+        [Inject] private IChatApi ChatApi { get; set; }
 
 
         [Inject]
@@ -58,6 +62,7 @@ namespace Dovecord.Client.Pages.Communication
         private string isTypingMarkup;
         private string placeholder;
         private string CurrentUsername;
+        private Guid CurrentUserId;
 
         protected override async Task OnInitializedAsync()
         {
@@ -84,12 +89,16 @@ namespace Dovecord.Client.Pages.Communication
             var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
             CurrentUsername = user.Identity?.Name;
+            CurrentUserId = Guid.Parse(authState.User.Claims.FirstOrDefault(c => c.Type == "sub").Value);
+            // TODO: Get right user ID
+            
+            //Log.LogInformation($"User id - {user.FindFirst("http://schemas.microsoft.com/ws/2008/06/identity/claims/nameidentifier")?.Value}");
+            //Log.LogInformation($"Current userid - {authState.User.Claims.FirstOrDefault(c => c.Type == "sub").Value}");
             
             Channels = await ChannelApi.ChannelList();
             CurrentChannel = Channels.First(a => a.ChannelName == "General");
-            Log.LogInformation($"Current chad it of general - {CurrentChannel.Id.ToString()}");
+            Log.LogInformation($"Current chat id of general - {CurrentChannel.Id.ToString()}");
             await LoadChannelChat(CurrentChannel);
-
         }
         
         async ValueTask<string> GetAccessTokenValueAsync()
@@ -143,7 +152,19 @@ namespace Dovecord.Client.Pages.Communication
         {
             if (_messageInput is { Length: > 0 })
             {
-                await _hubConnection.InvokeAsync("PostMessage", _messageInput, CurrentChannel.Id);
+                var channelmessage = new ChannelMessage
+                {
+                    Id = Guid.NewGuid(),
+                    Content = _messageInput,
+                    CreatedAt = DateTime.Now,
+                    IsEdit = false,
+                    Username = CurrentUsername,
+                    UserId = CurrentUserId,
+                    ChannelId = CurrentChannel.Id
+                };
+                
+                await ChatApi.SaveMessage(channelmessage);
+                await _hubConnection.InvokeAsync("PostMessage", channelmessage, CurrentChannel.Id);
                 _messageInput = null;
                 _messageId = null;
 
@@ -206,7 +227,7 @@ namespace Dovecord.Client.Pages.Communication
             await InvokeAsync(async () =>
             {
                 await _hubConnection.InvokeAsync("DeleteMessageById", message.Id);
-                await ChannelApi.DeleteMessageById(message.Id);
+                await ChatApi.DeleteMessageById(message.Id);
             });
         }
 

@@ -14,8 +14,5 @@ namespace Dovecord.Client.Services
 
         [Get("/Chat/{id}")]
         Task<List<ChannelMessage>> MessagesFomChannelId(Guid id);
-
-        [Delete("/Chat/delete/{id}")]
-        Task DeleteMessageById(Guid id);
     }
 }

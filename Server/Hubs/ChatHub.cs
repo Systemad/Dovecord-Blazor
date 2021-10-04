@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Dovecord.Client;
 using Dovecord.Client.Pages.Communication;
 using Dovecord.Data;
 using Dovecord.Shared;
@@ -18,12 +20,14 @@ namespace Dovecord.Server.Hubs
         
         private static readonly ConnectionMapping<string> _connections = 
             new ConnectionMapping<string>();
+
+        private static List<User> _connectedUsers = new List<User>();
         
         private ApplicationDbContext _context;
 
-        public ChatHub()
+        public ChatHub(ApplicationDbContext context)
         {
-            _context = new DesignTimeDbContextFactory().CreateDbContext(null!);
+            _context = context;
         }
         //readonly ICommandSignalService _commandSignal;
         
@@ -33,13 +37,14 @@ namespace Dovecord.Server.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            
+            /*
             if (!_context.Users.Any(u => u.Id == UserId))
             {
                 Console.WriteLine($"user does not exist . {Username}");
                 _context.Users.Add(CreateUser());
                 await _context.SaveChangesAsync();
             }
+            */
             await Clients.Others.UserLoggedOn(new Actor(Username));
         }
 
@@ -49,8 +54,9 @@ namespace Dovecord.Server.Hubs
             await Clients.Others.UserLoggedOff(new Actor(Username));
         }
 
-        public async Task PostMessage(string message, Guid channelId)
+        public async Task PostMessage(ChannelMessage message, Guid channelId)
         {
+            /*
             var channelmessage = new ChannelMessage
             {
                 Id = Guid.NewGuid(),
@@ -61,9 +67,10 @@ namespace Dovecord.Server.Hubs
                 UserId = UserId,
                 ChannelId = channelId,
             };
-            await Clients.Group(channelId.ToString()).MessageReceived(channelmessage);
-            _context.ChannelMessages.Add(channelmessage);
-            await _context.SaveChangesAsync();
+            */
+            await Clients.Group(channelId.ToString()).MessageReceived(message);
+            //_context.ChannelMessages.Add(channelmessage);
+            //await _context.SaveChangesAsync();
         }
 
         public async Task DeleteMessageById(string messageId)

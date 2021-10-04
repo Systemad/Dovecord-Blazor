@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
 using Dovecord.Data;
+using Dovecord.Data.Services;
 using Dovecord.Server.Hubs;
 using Dovecord.Server.Services;
 using Microsoft.AspNetCore.Cors.Infrastructure;
@@ -39,6 +40,7 @@ namespace Dovecord.Server
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite("Data Source=C:\\Users\\yeahg\\source\\repos\\Dovecord\\Dovecord.Data\\DovecordHQ.db")
             );
+            services.AddApplicationServices();
             services.AddAppAuthentication(Configuration);
             services.AddCors(options =>
             {
