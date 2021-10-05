@@ -20,6 +20,13 @@ using Microsoft.JSInterop;
 
 namespace Dovecord.Client.Pages.Communication
 {
+    // TODO: maybe split up like this https://github.com/blazorhero/CleanArchitecture/blob/master/src/Client/Shared/Components/UserCard.razor.cs
+    // https://github.com/blazorhero/CleanArchitecture/blob/master/src/Client/Shared/MainBody.razor.cs
+    // TODO: Split user service to MainLayout for example and keep Chat purely for messaging handling
+    // TODO: Add property ONLINE to user
+    // TODO: MainLayout: OnConnect, take  username and Id, then send to REST (UserController) and check if user exists,
+    // TODO: if it does, change ONLINE to true
+    // TODO: UserService, Take all users with property ONLINE as TRUE and add it list
     public partial class Chat : IAsyncDisposable
     {
         List<ChannelMessage> _messages;

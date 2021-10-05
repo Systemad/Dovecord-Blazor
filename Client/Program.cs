@@ -24,7 +24,14 @@ namespace Dovecord.Client
             builder.Services.AddHttpClient("Dovecord.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
                 .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
             
+            // TODO: Make a separate service
             builder.Services.AddRefitClient<IChannelApi>()
+                .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:5001/api"); })
+                .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+            builder.Services.AddRefitClient<IChatApi>()
+                .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:5001/api"); })
+                .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+            builder.Services.AddRefitClient<IUserApi>()
                 .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:5001/api"); })
                 .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
