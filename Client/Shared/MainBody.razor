@@ -1,0 +1,28 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject SignOutSessionStateManager SignOutManager
+<AuthorizeView>
+    <Authorized>
+        <MudAppBar Elevation="12">
+            <MudSpacer />
+            <MudMenu Direction="Direction.Left" OffsetX="true" Dense="true" Class="mt-1 ml-4">
+                <ActivatorContent>
+                    <MudAvatar Image=""/>
+                </ActivatorContent>
+                <ChildContent>
+                    <ProfileCard Class="mt-n2"/>
+                    <MudDivider Class="mb-2"/>
+                    <MudListItem Text="Account" Icon="@Icons.Material.Outlined.Person" Href="/authentication/profile"/>
+                    <MudListItem Text="Logout" Icon="@Icons.Material.Outlined.Login" OnClick="BeginSignOut"/>
+                </ChildContent>
+            </MudMenu>
+        </MudAppBar>
+    </Authorized>
+</AuthorizeView>
+<MudMainContent>
+    <MudContainer MaxWidth="MaxWidth.False" Class="mt-4">
+        @* <CascadingValue Value="hubConnection"> *@
+            @ChildContent
+        @* </CascadingValue>*@
+    </MudContainer>
+</MudMainContent>

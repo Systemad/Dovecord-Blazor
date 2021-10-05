@@ -2,33 +2,22 @@
 <MudThemeProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
-<MudLayout>
-    <MudAppBar Elevation="12">
-        @*
-        <MudHidden Breakpoint="Breakpoint.SmAndDown">
-            <MudIcon Icon="@Icons.Custom.Brands.MudBlazor" Size="Size.Large" />
-        </MudHidden>
-        *@
-        <MudSpacer />
-        <LoginDisplay/>
-    </MudAppBar>
-@*
-    <AuthorizeView>
-        <Authorized>
-            <MudDrawer @bind-Open="_drawerOpen" Elevation="_themeManager.DrawerElevation" ClipMode="_themeManager.DrawerClipMode">
-                <NavMenu/>
-            </MudDrawer>
-        </Authorized>
-    </AuthorizeView>
-        *@
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
-            @Body
-            @*
-            <CascadingValue Value="hubConnection">
+<AuthorizeView>
+    <NotAuthorized>
+        <MudAppBar Elevation="4" Color="Color.Primary">
+            <MudSpacer />
+        </MudAppBar>
+        <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center" Style="height: 100vh;">
+            <MudPaper Elevation="25" Class="pa-8" Style="width: 500px;">
                 @Body
-            </CascadingValue>
-            *@
-            </MudContainer>
-    </MudMainContent>
-</MudLayout>
+            </MudPaper>
+        </MudContainer>
+    </NotAuthorized>
+    <Authorized>
+        <MudLayout>
+            <MainBody>
+                @Body
+            </MainBody>
+        </MudLayout>
+    </Authorized>
+</AuthorizeView>
