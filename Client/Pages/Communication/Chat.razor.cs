@@ -39,8 +39,6 @@ namespace Dovecord.Client.Pages.Communication
         };
 
         private Channel CurrentChannel { get; set; }
-        private Channel LastChannel { get; set; }
-        
         HubConnection _hubConnection;
 
         string _messageId;
@@ -70,6 +68,8 @@ namespace Dovecord.Client.Pages.Communication
         private string placeholder;
         private string CurrentUsername;
         private Guid CurrentUserId;
+        
+        [Parameter] public string CGUID { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -104,6 +104,7 @@ namespace Dovecord.Client.Pages.Communication
             
             Channels = await ChannelApi.ChannelList();
             CurrentChannel = Channels.First(a => a.ChannelName == "General");
+            CGUID = CurrentChannel.Id.ToString();
             Log.LogInformation($"Current chat id of general - {CurrentChannel.Id.ToString()}");
             await LoadChannelChat(CurrentChannel);
         }
@@ -243,6 +244,7 @@ namespace Dovecord.Client.Pages.Communication
             await _hubConnection.InvokeAsync("RemoveChannelById", CurrentChannel.Id);
             await _hubConnection.InvokeAsync("JoinChannelById", channel.Id);
             _messages = await ChannelApi.MessagesFomChannelId(channel.Id);
+            CGUID = CurrentChannel.Id.ToString();
             CurrentChannel = channel;
         }
 
