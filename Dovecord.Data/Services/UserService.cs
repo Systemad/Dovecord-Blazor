@@ -15,14 +15,9 @@ namespace Dovecord.Data.Services
             _context = context;
         }
         
-        public async Task<bool> CreateUser(Guid userId, string username)
+        public async Task<bool> CreateUser(User user)
         {
-            var newuser = new User
-            {
-                Id = userId,
-                Username = username,
-            };
-            await _context.Users.AddAsync(newuser);
+            await _context.Users.AddAsync(user);
             var created = await _context.SaveChangesAsync();
             return created > 0;
         }

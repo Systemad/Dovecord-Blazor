@@ -31,12 +31,10 @@ namespace Dovecord.Client
             builder.Services.AddRefitClient<IChatApi>()
                 .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:5001/api"); })
                 .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
-            
-            /*
-             builder.Services.AddRefitClient<IUserApi>()
+            builder.Services.AddRefitClient<IUserApi>()
                 .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:5001/api"); })
                 .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
-            */
+            
 
             // Supply HttpClient instances that include access tokens when making requests to the server project
             builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Dovecord.ServerAPI"));
