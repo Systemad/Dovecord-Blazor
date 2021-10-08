@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dovecord.Data;
 using Dovecord.Data.Services;
+using Dovecord.Server.Extensions;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -36,16 +37,21 @@ namespace Dovecord.Server.Controllers
         {
             if (message is null)
                 return BadRequest("Message is null");
-            
             await _chatService.SaveMessageToChannelAsync(message);
             return Ok();
         }
         
+        // TODO: fix update
         [HttpPut("update")]
         public async Task<IActionResult> UpdateMessage([FromBody] ChannelMessage message)
         {
             if (message is null)
                 return BadRequest("Message is null");
+            
+            var ownsmessage = await _chatService.UserOwnsMessageAsync(message.Id, HttpContext.GetUserId());
+
+            if (!ownsmessage)
+                return BadRequest(new {error = "User does not own message"});
             
             await _chatService.UpdateMessageAsync(message);
             return Ok();
@@ -62,6 +68,11 @@ namespace Dovecord.Server.Controllers
         [HttpDelete("delete/{messageId:guid}")]
         public async Task<IActionResult> DeleteMessageById(Guid messageId)
         {
+            var ownsmessage = await _chatService.UserOwnsMessageAsync(messageId, HttpContext.GetUserId());
+
+            if (!ownsmessage)
+                return BadRequest(new {error = "User does not own message"});
+            
             var messagedeleted = await _chatService.DeleteMessageByIdAsync(messageId);
             return messagedeleted ? NoContent() : NotFound();
         }

@@ -53,5 +53,17 @@ namespace Dovecord.Data.Services
             var updated = await _context.SaveChangesAsync();
             return updated > 0;
         }
+
+        public async Task<bool> UserOwnsMessageAsync(Guid postId, string userId)
+        {
+            var post = await GetMessageByIdAsync(postId); //_context.ChannelMessages.AsNoTracking().SingleOrDefaultAsync(x => x.Id == postId);
+            if (post is null)
+                return false;
+
+            if (post.UserId != Guid.Parse(userId))
+                return false;
+            
+            return true;
+        }
     }
 }

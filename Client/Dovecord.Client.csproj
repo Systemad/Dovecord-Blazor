@@ -11,7 +11,7 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.10" />
     <PackageReference Include="Microsoft.Authentication.WebAssembly.Msal" Version="5.0.10" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
-    <PackageReference Include="MudBlazor" Version="5.1.4" />
+    <PackageReference Include="MudBlazor" Version="5.1.5" />
     <PackageReference Include="MudBlazor.ThemeManager" Version="1.0.5" />
     <PackageReference Include="Refit" Version="6.0.94" />
     <PackageReference Include="Refit.HttpClientFactory" Version="6.0.94" />

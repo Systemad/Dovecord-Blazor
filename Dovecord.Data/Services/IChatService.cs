@@ -13,5 +13,6 @@ namespace Dovecord.Data.Services
         Task<bool> SaveMessageToChannelAsync(ChannelMessage id);
         Task<ChannelMessage> GetMessageByIdAsync(Guid id);
         Task<bool> UpdateMessageAsync(ChannelMessage message);
+        Task<bool> UserOwnsMessageAsync(Guid postId, string userId);
     }
 }

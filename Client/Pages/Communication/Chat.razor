@@ -6,11 +6,15 @@
             <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Secondary" FullWidth="true">Create Channel</MudButton>
             <MudList Clickable="true">
                 @{
-                        foreach (var channel in Channels)
-                        {
-                            <MudListItem Dense="true" OnClick="@(() =>LoadChannelChat(channel))"># @channel.ChannelName</MudListItem>
-                        }
+                    if (Channels is null)
+                    {
+                        <ChannelLoading/>
                     }
+                    foreach (var channel in Channels)
+                    {
+                        <MudListItem Dense="true" OnClick="@(() =>LoadChannelChat(channel))"># @channel.ChannelName</MudListItem>
+                    }
+                }
             </MudList>
         </MudPaper>
     </MudHidden>
