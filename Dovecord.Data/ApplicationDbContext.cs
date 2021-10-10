@@ -58,6 +58,7 @@ namespace Dovecord.Data
                 Id = Guid.Parse("ca0f4479-5992-4a00-a3d5-d73ae1daff6f"),
                 //Guid = "ca0f4479-5992-4a00-a3d5-d73ae1daff6",
                 Username = "danova",
+                Online = false
                 //ServerId = serverguid
                 //Server = null
             });

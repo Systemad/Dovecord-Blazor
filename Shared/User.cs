@@ -8,14 +8,17 @@ namespace Dovecord.Shared
     
     public class User
     {
+        /*
         public User()
         {
             Users = new Collection<User>();
         }
+        */
+        
         public Guid Id { get; set; }
         public string Username { get; set; }
         public virtual ICollection<User> Users { get; set; }
-
+        public bool Online { get; set; }
         //public Color Color { get; set; } Add other info
     }
 }

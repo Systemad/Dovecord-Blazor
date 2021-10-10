@@ -46,10 +46,7 @@ namespace Dovecord.Client.Pages.Communication
         private List<Channel> Channels { get; set; } = new List<Channel>();
         ActorCommand _lastCommand;
         [Parameter] public string _messageInput { get; set; }
-        //List<SpeechSynthesisVoice> _voices;
-        string _voice = "Auto";
-        double _voiceSpeed = 1;
-        
+
         public Chat() =>
             _debounceTimer.Elapsed +=
                 async (sender, args) => await SetIsTyping(false);
@@ -60,7 +57,6 @@ namespace Dovecord.Client.Pages.Communication
         [Inject] private IChannelApi ChannelApi { get; set; }
         [Inject] private IChatApi ChatApi { get; set; }
 
-
         [Inject]
         public IAccessTokenProvider TokenProvider { get; set; }
 
@@ -70,7 +66,7 @@ namespace Dovecord.Client.Pages.Communication
         private Guid CurrentUserId;
         
         [Parameter] public string CGUID { get; set; }
-
+        
         protected override async Task OnInitializedAsync()
         {
             _hubConnection = new HubConnectionBuilder()
@@ -97,11 +93,6 @@ namespace Dovecord.Client.Pages.Communication
             var user = authState.User;
             CurrentUsername = user.Identity?.Name;
             CurrentUserId = Guid.Parse(authState.User.Claims.FirstOrDefault(c => c.Type == "sub").Value);
-            // TODO: Get right user ID
-            
-            //Log.LogInformation($"User id - {user.FindFirst("http://schemas.microsoft.com/ws/2008/06/identity/claims/nameidentifier")?.Value}");
-            //Log.LogInformation($"Current userid - {authState.User.Claims.FirstOrDefault(c => c.Type == "sub").Value}");
-            
             Channels = await ChannelApi.ChannelList();
             CurrentChannel = Channels.First(a => a.ChannelName == "General");
             CGUID = CurrentChannel.Id.ToString();
@@ -269,6 +260,7 @@ namespace Dovecord.Client.Pages.Communication
                 await _hubConnection.DisposeAsync();
             }
         }
+        
 
     }
 }

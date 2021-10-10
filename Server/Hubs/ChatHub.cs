@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dovecord.Client;
 using Dovecord.Client.Pages.Communication;
 using Dovecord.Data;
+using Dovecord.Data.Services;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -17,60 +18,30 @@ namespace Dovecord.Server.Hubs
     [RequiredScope("API.Access")]
     public class ChatHub : Hub<IChatClient>
     {
-        
-        private static readonly ConnectionMapping<string> _connections = 
-            new ConnectionMapping<string>();
-
-        private static List<User> _connectedUsers = new List<User>();
-        
-        private ApplicationDbContext _context;
-
-        public ChatHub(ApplicationDbContext context)
+        private IUserService _userService;
+        public ChatHub(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
-        //readonly ICommandSignalService _commandSignal;
-        
+
         string Username => Context?.User?.Identity?.Name ?? "Unknown";
         Guid UserId => Guid.Parse(Context?.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
 
         public override async Task OnConnectedAsync()
         {
-            /*
-            if (!_context.Users.Any(u => u.Id == UserId))
-            {
-                Console.WriteLine($"user does not exist . {Username}");
-                _context.Users.Add(CreateUser());
-                await _context.SaveChangesAsync();
-            }
-            */
             await Clients.Others.UserLoggedOn(new Actor(Username));
         }
 
         public override async Task OnDisconnectedAsync(Exception? ex)
         {
-            _connections.Remove(Username, Context.ConnectionId);
-            await Clients.Others.UserLoggedOff(new Actor(Username));
+            var user = await _userService.GetUserByIdAsync(UserId);
+            await _userService.UserLoggedOffAsync(user);
         }
 
         public async Task PostMessage(ChannelMessage message, Guid channelId)
         {
-            /*
-            var channelmessage = new ChannelMessage
-            {
-                Id = Guid.NewGuid(),
-                Content = message,
-                CreatedAt = DateTime.Now,
-                IsEdit = false,
-                Username = Username,
-                UserId = UserId,
-                ChannelId = channelId,
-            };
-            */
             await Clients.Group(channelId.ToString()).MessageReceived(message);
-            //_context.ChannelMessages.Add(channelmessage);
-            //await _context.SaveChangesAsync();
         }
 
         public async Task DeleteMessageById(string messageId)
@@ -91,12 +62,5 @@ namespace Dovecord.Server.Hubs
             Console.Write($"Left channel - {channelId.ToString()}");
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, channelId.ToString());
         }
-
-        private User CreateUser() => new()
-        {
-            Id = UserId,
-            Username = Username,
-        };
-
     }
 }

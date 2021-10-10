@@ -32,12 +32,12 @@ namespace Dovecord.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("7ff2e577-ca2d-497a-adbb-970bd24c477f"),
+                            Id = new Guid("14620ada-964b-49ec-a0ca-f84f02b8c4ec"),
                             ChannelName = "General"
                         },
                         new
                         {
-                            Id = new Guid("90c08ba2-51ac-4e7a-b7b4-afa4295a092f"),
+                            Id = new Guid("d3c496e5-ec35-4703-b154-649528fe29b8"),
                             ChannelName = "Random"
                         });
                 });
@@ -77,10 +77,10 @@ namespace Dovecord.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("876b8de0-2380-4c48-a34f-e79ca8201245"),
-                            ChannelId = new Guid("7ff2e577-ca2d-497a-adbb-970bd24c477f"),
+                            Id = new Guid("461f41b0-34ab-4453-8b62-9ccf6cd11ee7"),
+                            ChannelId = new Guid("14620ada-964b-49ec-a0ca-f84f02b8c4ec"),
                             Content = "First ever channel message",
-                            CreatedAt = new DateTime(2021, 9, 30, 16, 12, 33, 347, DateTimeKind.Local).AddTicks(1746),
+                            CreatedAt = new DateTime(2021, 10, 11, 0, 12, 44, 177, DateTimeKind.Local).AddTicks(5278),
                             IsEdit = false,
                             UserId = new Guid("ca0f4479-5992-4a00-a3d5-d73ae1daff6f"),
                             Username = "danova"
@@ -92,6 +92,9 @@ namespace Dovecord.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Online")
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("TEXT");
@@ -109,6 +112,7 @@ namespace Dovecord.Data.Migrations
                         new
                         {
                             Id = new Guid("ca0f4479-5992-4a00-a3d5-d73ae1daff6f"),
+                            Online = false,
                             Username = "danova"
                         });
                 });

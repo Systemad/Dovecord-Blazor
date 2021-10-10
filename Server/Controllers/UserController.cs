@@ -24,10 +24,12 @@ namespace Dovecord.Server.Controllers
         [HttpPost("connect")]
         public async Task<IActionResult> UserConnected([FromBody] User user)
         {
-            var exist = await _userService.CheckIfUserExist(user.Id);
+            var exist = await _userService.CheckIfUserExistAsync(user.Id);
 
             if (!exist)
-                await _userService.CreateUser(user);
+                await _userService.CreateUserAsync(user);
+
+            await _userService.UserLoggedOnAsync(user);
             
             return NoContent();
         }
