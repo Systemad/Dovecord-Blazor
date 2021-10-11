@@ -83,23 +83,7 @@
     </MudPaper>
     <MudHidden Breakpoint="Breakpoint.SmAndDown">
         <MudPaper Elevation="25" Class="pa-3 pb-16 ml-6" MinWidth="250px">
-            @*<ChatUsers chatUsers="ChatUsers" />
-            <MudListSubheader Class="ml-n2 mb-n4"><b>CORE TEAM</b> - @onlineUsers.Count()</MudListSubheader> *@
-            <MudList Clickable="true">
-                @*
-                @foreach (var user in ChatUsers)
-                {
-                    <MudListItem Class="pa-0 px-2" OnClick="@(() => LoadUserChat(user.Id))">
-                        <div class="d-flex flex-row mt-n1 mb-n1">
-                            <div>
-                                <MudText Typo="Typo.body2"><b>@user.Email</b></MudText>
-                            </div>
-                        </div>
-                    </MudListItem>
-                }
-                *@
-                <MudListSubheader Class="ml-n2 mb-n4"><b>OFFLINE</b></MudListSubheader>
-            </MudList>
+            <ChatUsers Users="Users"/>
         </MudPaper>
     </MudHidden>
 </div>

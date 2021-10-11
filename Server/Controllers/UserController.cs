@@ -12,27 +12,11 @@ namespace Dovecord.Server.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private ApplicationDbContext _context;
         private IUserService _userService;
 
         public UserController(ApplicationDbContext context, IUserService userService)
         {
-            _context = context;
             _userService = userService;
         }
-
-        [HttpPost("connect")]
-        public async Task<IActionResult> UserConnected([FromBody] User user)
-        {
-            var exist = await _userService.CheckIfUserExistAsync(user.Id);
-
-            if (!exist)
-                await _userService.CreateUserAsync(user);
-
-            await _userService.UserLoggedOnAsync(user);
-            
-            return NoContent();
-        }
-        
     }
 }

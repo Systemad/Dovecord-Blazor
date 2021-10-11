@@ -9,7 +9,7 @@ namespace Dovecord.Server.Hubs
     {
         Task UserLoggedOn(Actor actor);
 
-        Task UserLoggedOff(Actor actor);
+        Task SendUserList(List<User> users);
 
         Task UserTyping(ActorAction action);
 

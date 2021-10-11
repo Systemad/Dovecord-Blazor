@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -15,13 +16,9 @@ namespace Dovecord.Client.Extensions
             this HubConnection connection, Func<Guid, Task> handler) =>
             connection.On("DeleteMessageReceived", handler);
 
-        public static IDisposable OnUserLoggedOn(
-            this HubConnection connection, Func<Actor, Task> handler) =>
-            connection.On("UserLoggedOn", handler);
-
-        public static IDisposable OnUserLoggedOff(
-            this HubConnection connection, Func<Actor, Task> handler) =>
-            connection.On("UserLoggedOff", handler);
+        public static IDisposable OnUserListReceived(
+            this HubConnection connection, Func<List<User>, Task> handler) =>
+            connection.On("SendUserList", handler);
 
         public static IDisposable OnUserTyping(
             this HubConnection connection, Func<ActorAction, Task> handler) =>

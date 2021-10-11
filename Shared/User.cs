@@ -19,6 +19,8 @@ namespace Dovecord.Shared
         public string Username { get; set; }
         public virtual ICollection<User> Users { get; set; }
         public bool Online { get; set; }
+        
+        //TODO: Add color?, and imageURL (string)
         //public Color Color { get; set; } Add other info
     }
 }

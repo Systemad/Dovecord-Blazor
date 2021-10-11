@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Dovecord.Client;
-using Dovecord.Client.Pages.Communication;
-using Dovecord.Data;
 using Dovecord.Data.Services;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.Authorization;
@@ -30,13 +25,18 @@ namespace Dovecord.Server.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            await Clients.Others.UserLoggedOn(new Actor(Username));
+            var exist = await _userService.CheckIfUserExistAsync(UserId);
+            if (!exist)
+                await _userService.CreateUserAsync(UserId, Username);
+            
+            await _userService.UserLoggedOnAsync(UserId);
+            await Clients.All.SendUserList(await _userService.GetUsersAsync());
         }
 
         public override async Task OnDisconnectedAsync(Exception? ex)
         {
-            var user = await _userService.GetUserByIdAsync(UserId);
-            await _userService.UserLoggedOffAsync(user);
+            await _userService.UserLoggedOffAsync(UserId);
+            await Clients.All.SendUserList(await _userService.GetUsersAsync());
         }
 
         public async Task PostMessage(ChannelMessage message, Guid channelId)

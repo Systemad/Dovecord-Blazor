@@ -31,7 +31,7 @@ namespace Dovecord.Client.Shared
             };
             //CurrentUsername = user.Identity?.Name;
             //CurrentUserId = Guid.Parse(authState.User.Claims.FirstOrDefault(c => c.Type == "sub").Value);
-            await UserApi.SendConnectedUser(CurrentUser);
+            //await UserApi.SendConnectedUser(CurrentUser);
             //await hubConnection.StartAsync();
         }
 

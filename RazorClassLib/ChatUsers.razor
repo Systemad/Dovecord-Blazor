@@ -1,0 +1,29 @@
+@using Dovecord.Shared
+<MudList>
+    @if (Users is null)
+    {
+        @for (var i = 0; i < 20; i++)
+        {
+            i++;
+            <MudSkeleton Animation="Animation.Wave" Width="250px" />
+        }
+    }
+    else
+    {
+        <MudListSubheader Class="ml-n2 mb-n4"><b>ONLINE</b></MudListSubheader>
+        @foreach (var user in Users.Where(x => x.Online))
+        {
+            <User UserName="@user.Username" OnlineStatus="Color.Success"/>
+        }
+        <MudListSubheader Class="ml-n2 mb-n4"><b>OFFLINE</b></MudListSubheader>
+        @foreach (var user in Users.Where(x => x.Online != true))
+        {
+            <User UserName="@user.Username" OnlineStatus="Color.Error"/>
+        }    
+    }
+    
+</MudList>
+
+@code {
+    [Parameter] public List<Dovecord.Shared.User> Users { get; set; }
+}

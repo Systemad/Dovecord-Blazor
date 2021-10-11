@@ -21,9 +21,16 @@ namespace Dovecord.Data.Services
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<bool> CreateUserAsync(User user)
+        public async Task<bool> CreateUserAsync(Guid userId, string username)
         {
-            await _context.Users.AddAsync(user);
+            var newUser = new User
+            {
+                Id = userId,
+                Username = username,
+                Online = false
+            };
+            
+            await _context.Users.AddAsync(newUser);
             var created = await _context.SaveChangesAsync();
             return created > 0;
         }
@@ -34,18 +41,20 @@ namespace Dovecord.Data.Services
             return userexist;
         }
 
-        public async Task<bool> UserLoggedOnAsync(User user)
+        public async Task<bool> UserLoggedOnAsync(Guid userId)
         {
-            _context.Attach(user);
+            var user = await GetUserByIdAsync(userId);
+            //_context.Attach(user);
             user.Online = true;
             //_context.Update(user);
             var saved = await _context.SaveChangesAsync();
             return saved > 0;
         }
 
-        public async Task<bool> UserLoggedOffAsync(User user)
+        public async Task<bool> UserLoggedOffAsync(Guid userId)
         {
-            _context.Attach(user);
+            var user = await GetUserByIdAsync(userId);
+            //_context.Attach(user);
             user.Online = false;
             //_context.Update(user);
             var saved = await _context.SaveChangesAsync();

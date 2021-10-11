@@ -20,13 +20,9 @@ using Microsoft.JSInterop;
 
 namespace Dovecord.Client.Pages.Communication
 {
-    // TODO: maybe split up like this https://github.com/blazorhero/CleanArchitecture/blob/master/src/Client/Shared/Components/UserCard.razor.cs
-    // https://github.com/blazorhero/CleanArchitecture/blob/master/src/Client/Shared/MainBody.razor.cs
-    // TODO: Split user service to MainLayout for example and keep Chat purely for messaging handling
-    // TODO: Add property ONLINE to user
-    // TODO: MainLayout: OnConnect, take  username and Id, then send to REST (UserController) and check if user exists,
-    // TODO: if it does, change ONLINE to true
-    // TODO: UserService, Take all users with property ONLINE as TRUE and add it list
+    // TODO: fetch all users
+    // send as list to UserComponent 
+    // https://github.com/MudBlazor/Templates/blob/dev/src/.template.mudblazor/admindashboard/Pages/Applications/Chat/ChatUsers.razor
     public partial class Chat : IAsyncDisposable
     {
         List<ChannelMessage> _messages;
@@ -44,6 +40,7 @@ namespace Dovecord.Client.Pages.Communication
         string _messageId;
         bool _isTyping;
         private List<Channel> Channels { get; set; } = new List<Channel>();
+        private List<User> Users { get; set; }
         ActorCommand _lastCommand;
         [Parameter] public string _messageInput { get; set; }
 
@@ -56,15 +53,12 @@ namespace Dovecord.Client.Pages.Communication
         [Inject] public ILogger<Chat> Log { get; set; }
         [Inject] private IChannelApi ChannelApi { get; set; }
         [Inject] private IChatApi ChatApi { get; set; }
-
-        [Inject]
-        public IAccessTokenProvider TokenProvider { get; set; }
+        [Inject] public IAccessTokenProvider TokenProvider { get; set; }
 
         private string isTypingMarkup;
         private string placeholder;
         private string CurrentUsername;
         private Guid CurrentUserId;
-        
         [Parameter] public string CGUID { get; set; }
         
         protected override async Task OnInitializedAsync()
@@ -80,13 +74,7 @@ namespace Dovecord.Client.Pages.Communication
             _hubRegistrations.Add(_hubConnection.OnMessageReceived(OnMessageReceivedAsync));
             _hubRegistrations.Add(_hubConnection.OnUserTyping(OnUserTypingAsync));
             _hubRegistrations.Add(_hubConnection.OnDeleteMessageReceived(OnDeleteMessageReceived));
-            //_hubRegistrations.Add(
-            //    _hubConnection.OnCommandSignalReceived(OnCommandSignalReceived));
-            //_hubRegistrations.Add(_hubConnection.OnUserLoggedOn(
-            //    actor => JavaScript.NotifyAsync("Hey!", $"{actor.User} logged on...")));
-            //_hubRegistrations.Add(_hubConnection.OnUserLoggedOff(
-            //    actor => JavaScript.NotifyAsync("Bye!", $"{actor.User} logged off...")));
-
+            _hubRegistrations.Add(_hubConnection.OnUserListReceived(OnUserListReceived));
             await _hubConnection.StartAsync();
 
             var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
@@ -95,8 +83,6 @@ namespace Dovecord.Client.Pages.Communication
             CurrentUserId = Guid.Parse(authState.User.Claims.FirstOrDefault(c => c.Type == "sub").Value);
             Channels = await ChannelApi.ChannelList();
             CurrentChannel = Channels.First(a => a.ChannelName == "General");
-            CGUID = CurrentChannel.Id.ToString();
-            Log.LogInformation($"Current chat id of general - {CurrentChannel.Id.ToString()}");
             await LoadChannelChat(CurrentChannel);
         }
         
@@ -133,6 +119,14 @@ namespace Dovecord.Client.Pages.Communication
                 Log.LogInformation($"Client receive user typing method: {actorAction.IsTyping}");
                 StateHasChanged();
             });
+        
+        private async Task OnUserListReceived(List<User> users) =>
+            await InvokeAsync(
+                async () =>
+                {
+                    Users = users;
+                    StateHasChanged();
+                });
 
         async Task OnKeyUp(KeyboardEventArgs args)
         {
