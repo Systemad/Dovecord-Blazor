@@ -32,12 +32,12 @@ namespace Dovecord.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("14620ada-964b-49ec-a0ca-f84f02b8c4ec"),
+                            Id = new Guid("b87a3272-443e-4333-8805-e8ec0a59f4e1"),
                             ChannelName = "General"
                         },
                         new
                         {
-                            Id = new Guid("d3c496e5-ec35-4703-b154-649528fe29b8"),
+                            Id = new Guid("9b19e6d7-c4f0-4271-a659-54caf4ebd18f"),
                             ChannelName = "Random"
                         });
                 });
@@ -77,10 +77,10 @@ namespace Dovecord.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("461f41b0-34ab-4453-8b62-9ccf6cd11ee7"),
-                            ChannelId = new Guid("14620ada-964b-49ec-a0ca-f84f02b8c4ec"),
+                            Id = new Guid("13d37611-b858-4bce-bbdc-8cff16939305"),
+                            ChannelId = new Guid("b87a3272-443e-4333-8805-e8ec0a59f4e1"),
                             Content = "First ever channel message",
-                            CreatedAt = new DateTime(2021, 10, 11, 0, 12, 44, 177, DateTimeKind.Local).AddTicks(5278),
+                            CreatedAt = new DateTime(2021, 10, 12, 17, 22, 56, 131, DateTimeKind.Local).AddTicks(3213),
                             IsEdit = false,
                             UserId = new Guid("ca0f4479-5992-4a00-a3d5-d73ae1daff6f"),
                             Username = "danova"

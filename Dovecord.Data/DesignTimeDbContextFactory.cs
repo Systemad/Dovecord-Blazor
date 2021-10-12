@@ -17,7 +17,7 @@ namespace Dovecord.Data
             
             var builder = new DbContextOptionsBuilder(); 
             var connectionString = configuration.GetConnectionString("DatabaseConnection"); 
-            builder.UseSqlite("Data Source=C:\\Users\\yeahg\\source\\repos\\Dovecord\\Dovecord.Data\\DovecordHQ.db",
+            builder.UseSqlite("Data Source=DovecordHQ.db",
                 x => x.MigrationsAssembly(typeof(DesignTimeDbContextFactory).Assembly.FullName));
             return new ApplicationDbContext(builder.Options); 
         }
