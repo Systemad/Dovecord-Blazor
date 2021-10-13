@@ -12,5 +12,8 @@ namespace Dovecord.Client.Services
         
         [Post("/Chat/save")]
         Task SaveMessage([Body]ChannelMessage message);
+        
+        [Put("/Chat/update")]
+        Task UpdateMessage([Body]ChannelMessage message);
     }
 }

@@ -37,7 +37,7 @@ namespace Dovecord.Client.Pages.Communication
         private Channel CurrentChannel { get; set; }
         HubConnection _hubConnection;
 
-        string _messageId;
+        Guid _messageId;
         bool _isTyping;
         private List<Channel> Channels { get; set; } = new List<Channel>();
         private List<User> Users { get; set; }
@@ -103,7 +103,17 @@ namespace Dovecord.Client.Pages.Communication
             await InvokeAsync(
                 async () =>
                 {
-                    _messages.Add(message);
+                    var newmessage = _messages.FirstOrDefault(m => m.Id == message.Id);
+                    if (newmessage is null)
+                    {
+                        _messages.Add(message);
+                    }
+                    else
+                    {
+                        newmessage.Content = message.Content;
+                        newmessage.CreatedAt = message.CreatedAt;
+                    }
+                    
                     await JavaScript.ScrollIntoViewAsync();
                     StateHasChanged();
                 });
@@ -140,14 +150,14 @@ namespace Dovecord.Client.Pages.Communication
                 _messageInput = _lastCommand.OriginalText;
             }
         }
-        
+
         async Task SendMessage()
         {
             if (_messageInput is { Length: > 0 })
             {
                 var channelmessage = new ChannelMessage
                 {
-                    Id = Guid.NewGuid(),
+                    Id = _messageId,
                     Content = _messageInput,
                     CreatedAt = DateTime.Now,
                     IsEdit = false,
@@ -155,12 +165,19 @@ namespace Dovecord.Client.Pages.Communication
                     UserId = CurrentUserId,
                     ChannelId = CurrentChannel.Id
                 };
+
+                if (_messageId != Guid.Empty)
+                {
+                    await ChatApi.UpdateMessage(channelmessage);    
+                }
+                else
+                {
+                    await ChatApi.SaveMessage(channelmessage);    
+                }
                 
-                await ChatApi.SaveMessage(channelmessage);
                 await _hubConnection.InvokeAsync("PostMessage", channelmessage, CurrentChannel.Id);
                 _messageInput = null;
-                _messageId = null;
-
+                _messageId = Guid.Empty;
                 StateHasChanged();
             }
         }
@@ -192,7 +209,7 @@ namespace Dovecord.Client.Pages.Communication
             await SetIsTyping(false);
         }
         
-        /*
+        
         async Task StartEdit(ChannelMessage message)
         {
             if (message.Username != CurrentUsername)
@@ -204,11 +221,11 @@ namespace Dovecord.Client.Pages.Communication
                 async () =>
                 {
                     _messageId = message.Id;
-                    _messageInput = message.Text;
+                    _messageInput = message.Content;
                     StateHasChanged();
                 });
         }   
-        */
+        
         async Task DeleteMessageById(ChannelMessage message)
         {
             if (message.Username != CurrentUsername)
