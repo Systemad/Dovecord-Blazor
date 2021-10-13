@@ -30,13 +30,10 @@ namespace Dovecord.Server
         
         const string CorsPolicy = nameof(CorsPolicy);
         public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            //    .AddMicrosoftIdentityWebApi(Configuration.GetSection("AzureAdB2C"));
+            // Data Source=DovecordHQ.db for Azure web app
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlite("Data Source=..\\Dovecord.Data\\DovecordHQ.db")
             );
@@ -53,47 +50,12 @@ namespace Dovecord.Server
                             .AllowAnyHeader();
                     });
             });
-            /*
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "swaggerAADdemo", Version = "v1" });
-                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme {  
-                    Type = SecuritySchemeType.OAuth2,  
-                    Flows = new OpenApiOAuthFlows() {  
-                        Implicit = new OpenApiOAuthFlow() {  
-                            AuthorizationUrl = new Uri("https://login.microsoftonline.com/b8c0dbd8-0eba-4961-b4d6-10b67c5710b6/oauth2/v2.0/authorize"),  
-                            TokenUrl = new Uri("https://login.microsoftonline.com/b8c0dbd8-0eba-4961-b4d6-10b67c5710b6/oauth2/v2.0/token"),  
-                            Scopes = new Dictionary < string, string > {  
-                                {  
-                                    "API.Access",  
-                                    "Reads the Weather forecast"  
-                                }  
-                            }  
-                        }  
-                    }  
-                });  
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement() {  
-                    {  
-                        new OpenApiSecurityScheme {  
-                            Reference = new OpenApiReference {  
-                                Type = ReferenceType.SecurityScheme,  
-                                Id = "oauth2"  
-                            },  
-                            Scheme = "oauth2",  
-                            Name = "oauth2",  
-                            In = ParameterLocation.Header  
-                        },  
-                        new List < string > ()  
-                    }  
-                }); 
-            });
-            */
+            services.RegisterSwagger();
             services.AddControllersWithViews();
             services.AddRazorPages();
             
             services.AddSignalR(options => options.EnableDetailedErrors = true)
                 .AddMessagePackProtocol();
-            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -103,17 +65,7 @@ namespace Dovecord.Server
             {
                 app.UseDeveloperExceptionPage();
                 app.UseWebAssemblyDebugging();
-  
-                /*
-                app.UseSwagger();
-                app.UseSwaggerUI(c => {  
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "AzureAD_OAuth_API v1");  
-                    //c.RoutePrefix = string.Empty;    
-                    c.OAuthClientId("68a431c8-84fd-4fbd-87c6-e3d3ddec67f1");  
-                    c.OAuthClientSecret("api://89be5e10-1770-45d7-813a-d47242ae2163/API.Access");  
-                    c.OAuthUseBasicAuthenticationWithAccessCodeGrant();  
-                });   
-                */
+                app.ConfigureSwagger();
             }
             else
             {

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Identity.Web.Resource;
 
 namespace Dovecord.Server.Controllers
 {
@@ -20,21 +21,21 @@ namespace Dovecord.Server.Controllers
     public class ChatController : ControllerBase
     {
         private readonly ILogger<ChatController> _logger;
-        private ApplicationDbContext _context;
         private IChatService _chatService;
 
         static readonly string[] scopeRequiredByApi = new[] { "API.Access" };
      
-        public ChatController(ILogger<ChatController> logger, ApplicationDbContext context, IChatService chatService)
+        public ChatController(ILogger<ChatController> logger, IChatService chatService)
         {
             _logger = logger;
-            _context = context;
             _chatService = chatService;
         }
 
         [HttpPost("save")]
         public async Task<IActionResult> SaveMessageToChannel([FromBody] ChannelMessage message)
         {
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+            
             if (message is null)
                 return BadRequest("Message is null");
             await _chatService.SaveMessageToChannelAsync(message);
@@ -45,6 +46,7 @@ namespace Dovecord.Server.Controllers
         [HttpPut("update")]
         public async Task<IActionResult> UpdateMessage([FromBody] ChannelMessage message)
         {
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
             if (message is null)
                 return BadRequest("Message is null");
             
@@ -62,12 +64,14 @@ namespace Dovecord.Server.Controllers
         //[ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetMessagesFromChannelId(Guid channelId)
         {
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
             return Ok(await _chatService.GetMessagesByChannelIdAsync(channelId));
         }
         
         [HttpDelete("delete/{messageId:guid}")]
         public async Task<IActionResult> DeleteMessageById(Guid messageId)
         {
+            HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
             var ownsmessage = await _chatService.UserOwnsMessageAsync(messageId, HttpContext.GetUserId());
 
             if (!ownsmessage)
