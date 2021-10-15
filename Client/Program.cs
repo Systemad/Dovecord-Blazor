@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Text;
+using Blazored.LocalStorage;
 using Dovecord.Client.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -46,7 +47,8 @@ namespace Dovecord.Client
                 options.ProviderOptions.DefaultAccessTokenScopes.Add("https://danovas.onmicrosoft.com/89be5e10-1770-45d7-813a-d47242ae2163/API.Access");
                 options.ProviderOptions.LoginMode = "redirect";
             });
-
+            
+            builder.Services.AddBlazoredLocalStorage();
             builder.Services.AddMudServices();
 
             await builder.Build().RunAsync();

@@ -2,16 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Timers;
 using Dovecord.Client.Extensions;
 using Dovecord.Client.Services;
 using Dovecord.Shared;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,9 +16,6 @@ using Microsoft.JSInterop;
 
 namespace Dovecord.Client.Pages.Communication
 {
-    // TODO: fetch all users
-    // send as list to UserComponent 
-    // https://github.com/MudBlazor/Templates/blob/dev/src/.template.mudblazor/admindashboard/Pages/Applications/Chat/ChatUsers.razor
     public partial class Chat : IAsyncDisposable
     {
         List<ChannelMessage> _messages;
@@ -43,11 +36,13 @@ namespace Dovecord.Client.Pages.Communication
         private List<User> Users { get; set; }
         ActorCommand _lastCommand;
         [Parameter] public string _messageInput { get; set; }
+        [Parameter] public string CGUID { get; set; }
 
         public Chat() =>
             _debounceTimer.Elapsed +=
                 async (sender, args) => await SetIsTyping(false);
-        
+
+        [Inject] public Blazored.LocalStorage.ISyncLocalStorageService LocalStorage { get; set; }
         [Inject] public IJSRuntime JavaScript { get; set; }
         [Inject] public HttpClient Http { get; set; }
         [Inject] public ILogger<Chat> Log { get; set; }
@@ -59,8 +54,7 @@ namespace Dovecord.Client.Pages.Communication
         private string placeholder;
         private string CurrentUsername;
         private Guid CurrentUserId;
-        [Parameter] public string CGUID { get; set; }
-        
+
         protected override async Task OnInitializedAsync()
         {
             _hubConnection = new HubConnectionBuilder()
@@ -81,11 +75,11 @@ namespace Dovecord.Client.Pages.Communication
             var user = authState.User;
             CurrentUsername = user.Identity?.Name;
             CurrentUserId = Guid.Parse(authState.User.Claims.FirstOrDefault(c => c.Type == "sub").Value);
-            Channels = await ChannelApi.ChannelList();
-            CurrentChannel = Channels.First(a => a.ChannelName == "General");
+            
+            await LoadChannelInfo();
             await LoadChannelChat(CurrentChannel);
         }
-        
+
         async ValueTask<string> GetAccessTokenValueAsync()
         {
             var result = await TokenProvider.RequestAccessToken();
@@ -137,19 +131,6 @@ namespace Dovecord.Client.Pages.Communication
                     Users = users;
                     StateHasChanged();
                 });
-
-        async Task OnKeyUp(KeyboardEventArgs args)
-        {
-            if (args is { Key: "Enter" } and { Code: "Enter" })
-            {
-                await SendMessage();
-            }
-
-            if (args is { Key: "ArrowUp" } && _lastCommand is not null)
-            {
-                _messageInput = _lastCommand.OriginalText;
-            }
-        }
 
         async Task SendMessage()
         {
@@ -246,8 +227,26 @@ namespace Dovecord.Client.Pages.Communication
             await _hubConnection.InvokeAsync("RemoveChannelById", CurrentChannel.Id);
             await _hubConnection.InvokeAsync("JoinChannelById", channel.Id);
             _messages = await ChannelApi.MessagesFomChannelId(channel.Id);
-            CGUID = CurrentChannel.Id.ToString();
+            CGUID = channel.Id.ToString();
             CurrentChannel = channel;
+            LocalStorage.SetItem(CurrentUserId.ToString(), CGUID);
+            _navigationManager.NavigateTo($"{CGUID}");
+        }
+        
+        async Task LoadChannelInfo()
+        {
+            Channels = await ChannelApi.ChannelList();
+            var lastChannel = LocalStorage.ContainKey(CurrentUserId.ToString());
+            if (!lastChannel) 
+            {
+                CurrentChannel = Channels.First(a => a.ChannelName == "General");
+                CGUID = CurrentChannel.Id.ToString();
+            }
+            else {
+                CGUID = LocalStorage.GetItem<string>(CurrentUserId.ToString()); 
+                CurrentChannel = Channels.First(a => a.Id == Guid.Parse(CGUID));
+            }
+            _navigationManager.NavigateTo($"{CGUID}");
         }
 
         public async ValueTask DisposeAsync()
