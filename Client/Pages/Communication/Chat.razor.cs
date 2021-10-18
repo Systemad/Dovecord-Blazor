@@ -270,7 +270,5 @@ namespace Dovecord.Client.Pages.Communication
                 await _hubConnection.DisposeAsync();
             }
         }
-        
-
     }
 }

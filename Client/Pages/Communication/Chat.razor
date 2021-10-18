@@ -1,8 +1,8 @@
 @page "/{CGUID}"
 @page "/"
-<div class="d-flex flex-grow-1 flex-row" style="max-height:88vH;min-height:88vH">
+<div class="d-flex flex-grow-1 flex-row">
     <MudHidden Breakpoint="Breakpoint.SmAndDown">
-        <MudPaper Justif Elevation="25" Class="pa-3 mr-6" MinWidth="250px">
+        <MudPaper Elevation="25" Class="pa-3 mr-6" MinWidth="250px">
             <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Secondary" FullWidth="true">Create Channel</MudButton>
             <MudList Clickable="true">
                 @{
@@ -37,8 +37,7 @@
                 <MudIconButton OnClick="@(() => OpenDrawer(Anchor.Right))" Icon="@Icons.Material.Outlined.PeopleAlt" Color="Color.Inherit" Class="ml-3" />
             </MudHidden>
         </MudToolBar>
-        <div class="d-flex flex-column px-4" style="max-height:70vh; overflow:scroll;" id="chatContainer">
-            
+        <div class="d-flex flex-column px-4" style="max-height:65vh;min-height:65vh; overflow:scroll;" id="chatContainer">
             @{
                 @if (_messages is null)
                 {
@@ -72,7 +71,7 @@
                 //</span>
             }
         </MudPaper>
-        <MudPaper Class="d-flex flex-row px-2 mx-4" Style="background-color: var(--mud-palette-background-grey);">
+        <MudPaper Elevation="25" Class="d-flex flex-row px-2 mx-4" Style="">
             <MudIconButton Icon="@Icons.Material.Filled.AddCircle"></MudIconButton>
             
             <MudTextField AutoFocus="true" T="string" Placeholder="Enter your message..." DisableUnderLine="true" Class="mt-n2 mx-4"

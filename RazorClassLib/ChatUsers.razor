@@ -2,10 +2,10 @@
 <MudList>
     @if (Users is null)
     {
-        @for (var i = 0; i < 20; i++)
+        @for (var i = 0; i < 10; i++)
         {
             i++;
-            <MudSkeleton Animation="Animation.Wave" Width="250px" />
+            <UserLoading/>
         }
     }
     else
@@ -21,7 +21,6 @@
             <User UserName="@user.Username" OnlineStatus="Color.Error"/>
         }    
     }
-    
 </MudList>
 
 @code {
