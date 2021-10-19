@@ -28,13 +28,13 @@ namespace Dovecord.Client
             // TODO: Make a separate service
             // https://dovecord.azurewebsites.net/api for Azure web app
             builder.Services.AddRefitClient<IChannelApi>()
-                .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:5001/api"); })
+                .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://dovecord.azurewebsites.net/api"); })
                 .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
             builder.Services.AddRefitClient<IChatApi>()
-                .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:5001/api"); })
+                .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://dovecord.azurewebsites.net/api"); })
                 .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
             builder.Services.AddRefitClient<IUserApi>()
-                .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:5001/api"); })
+                .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://dovecord.azurewebsites.net/api"); })
                 .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
             
 
