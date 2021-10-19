@@ -104,11 +104,11 @@ namespace Dovecord.Client.Pages.Communication
                     }
                     else
                     {
+                        newmessage.IsEdit = true;
                         newmessage.Content = message.Content;
                         newmessage.CreatedAt = message.CreatedAt;
                     }
-                    
-                    await JavaScript.ScrollIntoViewAsync();
+                    //await JavaScript.ScrollIntoViewAsync();
                     StateHasChanged();
                 });
         
@@ -147,13 +147,14 @@ namespace Dovecord.Client.Pages.Communication
                     ChannelId = CurrentChannel.Id
                 };
 
-                if (_messageId != Guid.Empty)
+                if (_messageId == Guid.Empty)
                 {
-                    await ChatApi.UpdateMessage(channelmessage);    
+                    channelmessage.Id = Guid.NewGuid();
+                    await ChatApi.SaveMessage(channelmessage);
                 }
                 else
                 {
-                    await ChatApi.SaveMessage(channelmessage);    
+                    await ChatApi.UpdateMessage(channelmessage);     
                 }
                 
                 await _hubConnection.InvokeAsync("PostMessage", channelmessage, CurrentChannel.Id);
