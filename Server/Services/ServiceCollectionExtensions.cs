@@ -100,6 +100,7 @@ namespace Dovecord.Server.Services
         {
             services.AddTransient<IChatService, ChatService>();
             services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IChannelService, ChannelService>();
             return services;
         }
     }

@@ -1,23 +1,12 @@
-using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Web;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Linq;
 using Dovecord.Data;
-using Dovecord.Data.Services;
 using Dovecord.Server.Hubs;
 using Dovecord.Server.Services;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 
 namespace Dovecord.Server
 {
@@ -50,6 +39,7 @@ namespace Dovecord.Server
                             .AllowAnyHeader();
                     });
             });
+            services.AddRouting(options => options.LowercaseUrls = true);
             services.RegisterSwagger();
             services.AddControllersWithViews();
             services.AddRazorPages();

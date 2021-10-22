@@ -1,19 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Dovecord.Data;
 using Dovecord.Data.Services;
 using Dovecord.Server.Extensions;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Web.Resource;
 
-namespace Dovecord.Server.Controllers
+namespace Dovecord.Server.Controllers.v1
 {
     [Authorize]
     [ApiController]

@@ -9,7 +9,7 @@ namespace Dovecord.Client.Services
     //[Headers("Authorization: Bearer")]
     public interface IChannelApi
     {
-        [Get("/Channel/all")]
+        [Get(ApiRoutes.Channels.GetList)]
         Task<List<Channel>> ChannelList();
 
         [Get("/Chat/{id}")]
