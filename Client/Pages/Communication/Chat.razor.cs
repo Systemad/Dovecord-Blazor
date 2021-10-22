@@ -32,16 +32,16 @@ namespace Dovecord.Client.Pages.Communication
 
         Guid _messageId;
         bool _isTyping;
-        private List<Channel> Channels { get; set; } = new List<Channel>();
+        private List<Channel> Channels { get; set; } = new();
         private List<User> Users { get; set; }
         ActorCommand _lastCommand;
         [Parameter] public string _messageInput { get; set; }
         [Parameter] public string CGUID { get; set; }
-
+        
         public Chat() =>
             _debounceTimer.Elapsed +=
                 async (sender, args) => await SetIsTyping(false);
-
+        
         [Inject] public Blazored.LocalStorage.ISyncLocalStorageService LocalStorage { get; set; }
         [Inject] public IJSRuntime JavaScript { get; set; }
         [Inject] public HttpClient Http { get; set; }
@@ -108,7 +108,7 @@ namespace Dovecord.Client.Pages.Communication
                         newmessage.Content = message.Content;
                         newmessage.CreatedAt = message.CreatedAt;
                     }
-                    //await JavaScript.ScrollIntoViewAsync();
+                    await JavaScript.ScrollIntoViewAsync();
                     StateHasChanged();
                 });
         
