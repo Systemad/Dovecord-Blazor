@@ -75,7 +75,7 @@
             <MudIconButton Icon="@Icons.Material.Filled.AddCircle"></MudIconButton>
             
             <MudTextField AutoFocus="true" T="string" Placeholder="Enter your message..." DisableUnderLine="true" Class="mt-n2 mx-4"
-                          Immediate="true" TextChanged="InitiateDebounceUserIsTyping" @bind-Value="_messageInput" />
+                          TextChanged="InitiateDebounceUserIsTyping" @bind-Value="_messageInput" />
             <MudButton OnClick="SendMessage" StartIcon="@Icons.Material.Outlined.Send" Color="Color.Secondary" ButtonType="ButtonType.Button">Send</MudButton>
         </MudPaper>
     </MudPaper>
