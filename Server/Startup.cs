@@ -35,7 +35,7 @@ namespace Dovecord.Server
         {
             // Data Source=DovecordHQ.db for Azure web app
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite("Data Source=..\\Dovecord.Data\\DovecordHQ.db")
+                options.UseSqlite("Data Source=..\\Data\\DovecordHQ.db")
             );
             services.AddApplicationServices();
             services.AddAppAuthentication(Configuration);

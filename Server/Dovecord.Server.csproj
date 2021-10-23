@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Client\Dovecord.Client.csproj" />
-    <ProjectReference Include="..\Dovecord.Data\Dovecord.Data.csproj" />
+    <ProjectReference Include="..\Data\Dovecord.Data.csproj" />
     <ProjectReference Include="..\Shared\Dovecord.Shared.csproj" />
   </ItemGroup>
 
