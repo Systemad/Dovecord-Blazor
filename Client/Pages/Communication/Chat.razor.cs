@@ -14,262 +14,261 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
-namespace Dovecord.Client.Pages.Communication
+namespace Dovecord.Client.Pages.Communication;
+
+public partial class Chat : IAsyncDisposable
 {
-    public partial class Chat : IAsyncDisposable
+    List<ChannelMessage> _messages;
+    readonly HashSet<Actor> _usersTyping = new();
+    readonly HashSet<IDisposable> _hubRegistrations = new();
+    readonly Timer _debounceTimer = new()
     {
-        List<ChannelMessage> _messages;
-        readonly HashSet<Actor> _usersTyping = new();
-        readonly HashSet<IDisposable> _hubRegistrations = new();
-        readonly Timer _debounceTimer = new()
-        {
-            Interval = 750,
-            AutoReset = false
-        };
+        Interval = 750,
+        AutoReset = false
+    };
 
-        private Channel CurrentChannel { get; set; }
-        HubConnection _hubConnection;
+    private Channel CurrentChannel { get; set; }
+    HubConnection _hubConnection;
 
-        Guid _messageId;
-        bool _isTyping;
-        private List<Channel> Channels { get; set; } = new();
-        private List<User> Users { get; set; }
-        ActorCommand _lastCommand;
-        [Parameter] public string _messageInput { get; set; }
-        [Parameter] public string CGUID { get; set; }
+    Guid _messageId;
+    bool _isTyping;
+    private List<Channel> Channels { get; set; } = new();
+    private List<User> Users { get; set; }
+    ActorCommand _lastCommand;
+    [Parameter] public string _messageInput { get; set; }
+    [Parameter] public string CGUID { get; set; }
         
-        public Chat() =>
-            _debounceTimer.Elapsed +=
-                async (sender, args) => await SetIsTyping(false);
+    public Chat() =>
+        _debounceTimer.Elapsed +=
+            async (sender, args) => await SetIsTyping(false);
         
-        [Inject] public Blazored.LocalStorage.ISyncLocalStorageService LocalStorage { get; set; }
-        [Inject] public IJSRuntime JavaScript { get; set; }
-        [Inject] public HttpClient Http { get; set; }
-        [Inject] public ILogger<Chat> Log { get; set; }
-        [Inject] private IChannelApi ChannelApi { get; set; }
-        [Inject] private IChatApi ChatApi { get; set; }
-        [Inject] public IAccessTokenProvider TokenProvider { get; set; }
+    [Inject] public Blazored.LocalStorage.ISyncLocalStorageService LocalStorage { get; set; }
+    [Inject] public IJSRuntime JavaScript { get; set; }
+    [Inject] public HttpClient Http { get; set; }
+    [Inject] public ILogger<Chat> Log { get; set; }
+    [Inject] private IChannelApi ChannelApi { get; set; }
+    [Inject] private IChatApi ChatApi { get; set; }
+    [Inject] public IAccessTokenProvider TokenProvider { get; set; }
 
-        private string isTypingMarkup;
-        private string placeholder;
-        private string CurrentUsername;
-        private Guid CurrentUserId;
+    private string isTypingMarkup;
+    private string placeholder;
+    private string CurrentUsername;
+    private Guid CurrentUserId;
 
-        protected override async Task OnInitializedAsync()
-        {
-            _hubConnection = new HubConnectionBuilder()
-                .WithUrl(_navigationManager.ToAbsoluteUri("/chathub"),
-                    options => options.AccessTokenProvider =
-                        async () => await GetAccessTokenValueAsync())
-                .WithAutomaticReconnect()
-                .AddMessagePackProtocol()
-                .Build();
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(_navigationManager.ToAbsoluteUri("/chathub"),
+                options => options.AccessTokenProvider =
+                    async () => await GetAccessTokenValueAsync())
+            .WithAutomaticReconnect()
+            .AddMessagePackProtocol()
+            .Build();
 
-            _hubRegistrations.Add(_hubConnection.OnMessageReceived(OnMessageReceivedAsync));
-            _hubRegistrations.Add(_hubConnection.OnUserTyping(OnUserTypingAsync));
-            _hubRegistrations.Add(_hubConnection.OnDeleteMessageReceived(OnDeleteMessageReceived));
-            _hubRegistrations.Add(_hubConnection.OnUserListReceived(OnUserListReceived));
-            await _hubConnection.StartAsync();
+        _hubRegistrations.Add(_hubConnection.OnMessageReceived(OnMessageReceivedAsync));
+        _hubRegistrations.Add(_hubConnection.OnUserTyping(OnUserTypingAsync));
+        _hubRegistrations.Add(_hubConnection.OnDeleteMessageReceived(OnDeleteMessageReceived));
+        _hubRegistrations.Add(_hubConnection.OnUserListReceived(OnUserListReceived));
+        await _hubConnection.StartAsync();
 
-            var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-            CurrentUsername = user.Identity?.Name;
-            CurrentUserId = Guid.Parse(authState.User.Claims.FirstOrDefault(c => c.Type == "sub").Value);
+        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        CurrentUsername = user.Identity?.Name;
+        CurrentUserId = Guid.Parse(authState.User.Claims.FirstOrDefault(c => c.Type == "sub").Value);
             
-            await LoadChannelInfo();
-            await LoadChannelChat(CurrentChannel);
-        }
+        await LoadChannelInfo();
+        await LoadChannelChat(CurrentChannel);
+    }
 
-        async ValueTask<string> GetAccessTokenValueAsync()
-        {
-            var result = await TokenProvider.RequestAccessToken();
-            return result.TryGetToken(out var accessToken) ? accessToken.Value : null;
-        }
+    async ValueTask<string> GetAccessTokenValueAsync()
+    {
+        var result = await TokenProvider.RequestAccessToken();
+        return result.TryGetToken(out var accessToken) ? accessToken.Value : null;
+    }
 
-        async Task OnDeleteMessageReceived(Guid messageId) => await InvokeAsync(async () =>
-        {
-            _messages.Remove(_messages.First(a => a.Id == messageId));
-            await JavaScript.ScrollIntoViewAsync();
-            StateHasChanged();
-        });
+    async Task OnDeleteMessageReceived(Guid messageId) => await InvokeAsync(async () =>
+    {
+        _messages.Remove(_messages.First(a => a.Id == messageId));
+        await JavaScript.ScrollIntoViewAsync();
+        StateHasChanged();
+    });
 
-        private async Task OnMessageReceivedAsync(ChannelMessage message) =>
-            await InvokeAsync(
-                async () =>
-                {
-                    var newmessage = _messages.FirstOrDefault(m => m.Id == message.Id);
-                    if (newmessage is null)
-                    {
-                        _messages.Add(message);
-                    }
-                    else
-                    {
-                        newmessage.IsEdit = true;
-                        newmessage.Content = message.Content;
-                        newmessage.CreatedAt = message.CreatedAt;
-                    }
-                    await JavaScript.ScrollIntoViewAsync();
-                    StateHasChanged();
-                });
-        
-        async Task OnUserTypingAsync(ActorAction actorAction) =>
-            await InvokeAsync(() =>
+    private async Task OnMessageReceivedAsync(ChannelMessage message) =>
+        await InvokeAsync(
+            async () =>
             {
-                var (user, isTyping) = actorAction;
-                _ = isTyping
-                    ? _usersTyping.Add(new Actor(user))
-                    : _usersTyping.Remove(new Actor(user));
-
-                Log.LogInformation($"Client receive user typing method: {actorAction.IsTyping}");
-                StateHasChanged();
-            });
-        
-        private async Task OnUserListReceived(List<User> users) =>
-            await InvokeAsync(
-                async () =>
+                var newmessage = _messages.FirstOrDefault(m => m.Id == message.Id);
+                if (newmessage is null)
                 {
-                    Users = users;
-                    StateHasChanged();
-                });
-
-        async Task SendMessage()
-        {
-            if (_messageInput is { Length: > 0 })
-            {
-                var channelmessage = new ChannelMessage
-                {
-                    Id = _messageId,
-                    Content = _messageInput,
-                    CreatedAt = DateTime.Now,
-                    IsEdit = false,
-                    Username = CurrentUsername,
-                    UserId = CurrentUserId,
-                    ChannelId = CurrentChannel.Id
-                };
-
-                if (_messageId == Guid.Empty)
-                {
-                    channelmessage.Id = Guid.NewGuid();
-                    await ChatApi.SaveMessage(channelmessage);
+                    _messages.Add(message);
                 }
                 else
                 {
-                    await ChatApi.UpdateMessage(channelmessage);     
+                    newmessage.IsEdit = true;
+                    newmessage.Content = message.Content;
+                    newmessage.CreatedAt = message.CreatedAt;
                 }
-                
-                await _hubConnection.InvokeAsync("PostMessage", channelmessage, CurrentChannel.Id);
-                _messageInput = null;
-                _messageId = Guid.Empty;
+                await JavaScript.ScrollIntoViewAsync();
                 StateHasChanged();
-            }
-        }
+            });
         
-        async Task InitiateDebounceUserIsTyping()
+    async Task OnUserTypingAsync(ActorAction actorAction) =>
+        await InvokeAsync(() =>
+        {
+            var (user, isTyping) = actorAction;
+            _ = isTyping
+                ? _usersTyping.Add(new Actor(user))
+                : _usersTyping.Remove(new Actor(user));
+
+            Log.LogInformation($"Client receive user typing method: {actorAction.IsTyping}");
+            StateHasChanged();
+        });
+        
+    private async Task OnUserListReceived(List<User> users) =>
+        await InvokeAsync(
+            async () =>
+            {
+                Users = users;
+                StateHasChanged();
+            });
+
+    async Task SendMessage()
+    {
+        if (_messageInput is { Length: > 0 })
+        {
+            var channelmessage = new ChannelMessage
+            {
+                Id = _messageId,
+                Content = _messageInput,
+                CreatedAt = DateTime.Now,
+                IsEdit = false,
+                Username = CurrentUsername,
+                UserId = CurrentUserId,
+                ChannelId = CurrentChannel.Id
+            };
+
+            if (_messageId == Guid.Empty)
+            {
+                channelmessage.Id = Guid.NewGuid();
+                await ChatApi.SaveMessage(channelmessage);
+            }
+            else
+            {
+                await ChatApi.UpdateMessage(channelmessage);     
+            }
+                
+            await _hubConnection.InvokeAsync("PostMessage", channelmessage, CurrentChannel.Id);
+            _messageInput = null;
+            _messageId = Guid.Empty;
+            StateHasChanged();
+        }
+    }
+        
+    async Task InitiateDebounceUserIsTyping()
+    {
+        _debounceTimer.Stop();
+        _debounceTimer.Start();
+
+        await SetIsTyping(true);
+    }
+        
+    // TODO: Only display in current channel (possible fix? current channel id as parameter in url)
+    async Task SetIsTyping(bool isTyping)
+    {
+        if (_isTyping && isTyping)
+        {
+            return;
+        }
+
+        Log.LogInformation($"Setting is typing: {isTyping}");
+
+        await _hubConnection.InvokeAsync("UserTyping", _isTyping = isTyping);
+    }
+
+    async Task AppendToMessage(string text)
+    {
+        _messageInput += text;
+        await SetIsTyping(false);
+    }
+        
+        
+    async Task StartEdit(ChannelMessage message)
+    {
+        if (message.Username != CurrentUsername)
+        {
+            return;
+        }
+            
+        await InvokeAsync(
+            async () =>
+            {
+                _messageId = message.Id;
+                _messageInput = message.Content;
+                StateHasChanged();
+            });
+    }   
+        
+    async Task DeleteMessageById(ChannelMessage message)
+    {
+        if (message.Username != CurrentUsername)
+        {
+            Console.WriteLine("Message not owned by user");
+            return;
+        }
+
+        await InvokeAsync(async () =>
+        {
+            await _hubConnection.InvokeAsync("DeleteMessageById", message.Id);
+            await ChatApi.DeleteMessageById(message.Id);
+        });
+    }
+
+    async Task LoadChannelChat(Channel channel)
+    {
+        await _hubConnection.InvokeAsync("RemoveChannelById", CurrentChannel.Id);
+        await _hubConnection.InvokeAsync("JoinChannelById", channel.Id);
+        _messages = await ChannelApi.MessagesFomChannelId(channel.Id);
+        CGUID = channel.Id.ToString();
+        CurrentChannel = channel;
+        LocalStorage.SetItem(CurrentUserId.ToString(), CGUID);
+        _navigationManager.NavigateTo($"{CGUID}");
+    }
+        
+    async Task LoadChannelInfo()
+    {
+        Channels = await ChannelApi.ChannelList();
+        var lastChannel = LocalStorage.ContainKey(CurrentUserId.ToString());
+        if (!lastChannel) 
+        {
+            CurrentChannel = Channels.First(a => a.ChannelName == "General");
+            CGUID = CurrentChannel.Id.ToString();
+        }
+        else {
+            CGUID = LocalStorage.GetItem<string>(CurrentUserId.ToString()); 
+            CurrentChannel = Channels.First(a => a.Id == Guid.Parse(CGUID));
+        }
+        _navigationManager.NavigateTo($"{CGUID}");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_debounceTimer is { })
         {
             _debounceTimer.Stop();
-            _debounceTimer.Start();
-
-            await SetIsTyping(true);
-        }
-        
-        // TODO: Only display in current channel (possible fix? current channel id as parameter in url)
-        async Task SetIsTyping(bool isTyping)
-        {
-            if (_isTyping && isTyping)
-            {
-                return;
-            }
-
-            Log.LogInformation($"Setting is typing: {isTyping}");
-
-            await _hubConnection.InvokeAsync("UserTyping", _isTyping = isTyping);
+            _debounceTimer.Dispose();
         }
 
-        async Task AppendToMessage(string text)
+        if (_hubRegistrations is { Count: > 0 })
         {
-            _messageInput += text;
-            await SetIsTyping(false);
-        }
-        
-        
-        async Task StartEdit(ChannelMessage message)
-        {
-            if (message.Username != CurrentUsername)
+            foreach (var disposable in _hubRegistrations)
             {
-                return;
+                disposable.Dispose();
             }
-            
-            await InvokeAsync(
-                async () =>
-                {
-                    _messageId = message.Id;
-                    _messageInput = message.Content;
-                    StateHasChanged();
-                });
-        }   
-        
-        async Task DeleteMessageById(ChannelMessage message)
-        {
-            if (message.Username != CurrentUsername)
-            {
-                Console.WriteLine("Message not owned by user");
-                return;
-            }
-
-            await InvokeAsync(async () =>
-            {
-                await _hubConnection.InvokeAsync("DeleteMessageById", message.Id);
-                await ChatApi.DeleteMessageById(message.Id);
-            });
         }
 
-        async Task LoadChannelChat(Channel channel)
+        if (_hubConnection is not null)
         {
-            await _hubConnection.InvokeAsync("RemoveChannelById", CurrentChannel.Id);
-            await _hubConnection.InvokeAsync("JoinChannelById", channel.Id);
-            _messages = await ChannelApi.MessagesFomChannelId(channel.Id);
-            CGUID = channel.Id.ToString();
-            CurrentChannel = channel;
-            LocalStorage.SetItem(CurrentUserId.ToString(), CGUID);
-            _navigationManager.NavigateTo($"{CGUID}");
-        }
-        
-        async Task LoadChannelInfo()
-        {
-            Channels = await ChannelApi.ChannelList();
-            var lastChannel = LocalStorage.ContainKey(CurrentUserId.ToString());
-            if (!lastChannel) 
-            {
-                CurrentChannel = Channels.First(a => a.ChannelName == "General");
-                CGUID = CurrentChannel.Id.ToString();
-            }
-            else {
-                CGUID = LocalStorage.GetItem<string>(CurrentUserId.ToString()); 
-                CurrentChannel = Channels.First(a => a.Id == Guid.Parse(CGUID));
-            }
-            _navigationManager.NavigateTo($"{CGUID}");
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            if (_debounceTimer is { })
-            {
-                _debounceTimer.Stop();
-                _debounceTimer.Dispose();
-            }
-
-            if (_hubRegistrations is { Count: > 0 })
-            {
-                foreach (var disposable in _hubRegistrations)
-                {
-                    disposable.Dispose();
-                }
-            }
-
-            if (_hubConnection is not null)
-            {
-                await _hubConnection.DisposeAsync();
-            }
+            await _hubConnection.DisposeAsync();
         }
     }
 }

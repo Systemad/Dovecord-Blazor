@@ -1,22 +1,19 @@
-using System.Threading.Tasks;
 using Dovecord.Data;
 using Dovecord.Data.Services;
-using Dovecord.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Dovecord.Server.Controllers
-{
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UserController : ControllerBase
-    {
-        private IUserService _userService;
+namespace Dovecord.Server.Controllers;
 
-        public UserController(ApplicationDbContext context, IUserService userService)
-        {
-            _userService = userService;
-        }
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+public class UserController : ControllerBase
+{
+    private IUserService _userService;
+
+    public UserController(ApplicationDbContext context, IUserService userService)
+    {
+        _userService = userService;
     }
 }
