@@ -1,5 +1,7 @@
-﻿using Dovecord.Data.Services;
+﻿using Dovecord.Data;
+using Dovecord.Data.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 
@@ -96,4 +98,10 @@ static class ServiceCollectionExtensions
         services.AddTransient<IUserService, UserService>();
         return services;
     }
+
+    internal static IServiceCollection AddDatabase(
+        this IServiceCollection services)
+        => services
+            .AddDbContext<ApplicationDbContext>(options => options
+                .UseSqlite("Data Source=..\\Data\\DovecordHQ.db"));
 }

@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 const string CorsPolicy = nameof(CorsPolicy);
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite("Data Source=..\\Data\\DovecordHQ.db")
-);
+builder.Services.AddDatabase();
 builder.Services.AddApplicationServices();
 builder.Services.AddAppAuthentication(builder.Configuration);
 builder.Services.AddCors(options =>
