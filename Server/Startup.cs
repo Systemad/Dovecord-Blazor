@@ -1,10 +1,10 @@
-using Dovecord.Data;
 using Dovecord.Server.Hubs;
 using Dovecord.Server.Services;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 const string CorsPolicy = nameof(CorsPolicy);
+
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddDatabase();
 builder.Services.AddApplicationServices();
 builder.Services.AddAppAuthentication(builder.Configuration);

@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Dovecord.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
-using Dovecord.Shared;
 
-namespace Dovecord.Server.Controllers;
+namespace Dovecord.Server.Controllers.v1;
 
 [Authorize]
 [ApiController]

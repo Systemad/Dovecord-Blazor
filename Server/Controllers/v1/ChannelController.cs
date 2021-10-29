@@ -1,40 +1,38 @@
-using Dovecord.Data;
+using Dovecord.Data.Interfaces;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 
-namespace Dovecord.Server.Controllers;
+namespace Dovecord.Server.Controllers.v1;
 
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
+[ApiVersion("1.0")]
 public class ChannelController : ControllerBase
 {
     private readonly ILogger<ChannelController> _logger;
-    private ApplicationDbContext _applicationDbContext;
+    private IChannelService _channelService;
 
     static readonly string[] scopeRequiredByApi = new[] { "API.Access" };
      
-    public ChannelController(ILogger<ChannelController> logger, ApplicationDbContext applicationDbContext)
+    public ChannelController(ILogger<ChannelController> logger, IChannelService channelService)
     {
         _logger = logger;
-        _applicationDbContext = applicationDbContext;
+        _channelService = channelService;
     }   
-
-        
-    //[AllowAnonymous]
-    [HttpGet("all")]
-    public List<Channel> GetChannels()
+    
+    [HttpGet("channels")]
+    public async Task<List<Channel>> GetChannels()
     {
         HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
-            
-        var channels = _applicationDbContext.Channels.ToList();
+        var channels = await _channelService.GetChannels();
         return channels;
     }
         
-    [HttpPut("create/{name}")]
-    public IActionResult CreateChannel([FromRoute]string name)
+    [HttpPost("{name}")]
+    public async Task<IActionResult> CreateChannel([FromRoute]string name)
     {
         HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
         var channel = new Channel
@@ -42,8 +40,7 @@ public class ChannelController : ControllerBase
             Id = Guid.NewGuid(),
             ChannelName = name,
         };
-        _applicationDbContext.Channels.Add(channel);
-        _applicationDbContext.SaveChangesAsync();
-        return Ok($"Channel {name} created");
+        await _channelService.CreateChannelAsync(channel);
+        return Ok(channel);
     }
 }

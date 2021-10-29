@@ -7,12 +7,12 @@ namespace Dovecord.Client.Services;
 
 public interface IChatApi
 {
-    [Delete("/Chat/delete/{id}")]
+    [Delete("/chat/{id}")]
     Task DeleteMessageById(Guid id);
         
-    [Post("/Chat/save")]
+    [Post("/chat")]
     Task SaveMessage([Body]ChannelMessage message);
         
-    [Put("/Chat/update")]
+    [Put("/chat")]
     Task UpdateMessage([Body]ChannelMessage message);
 }

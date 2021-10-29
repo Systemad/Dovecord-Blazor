@@ -1,4 +1,4 @@
-using Dovecord.Data.Services;
+using Dovecord.Data.Interfaces;
 using Dovecord.Server.Extensions;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.Authorization;
@@ -8,11 +8,12 @@ using Microsoft.Identity.Web.Resource;
 
 // TODO: Refactor Controller to .NET 6 style
 // TODO: Refactor controller implementation i.e add error codes etc
-namespace Dovecord.Server.Controllers;
+namespace Dovecord.Server.Controllers.v1;
 
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
+[ApiVersion("1.0")]
 public class ChatController : ControllerBase
 {
     private readonly ILogger<ChatController> _logger;
@@ -26,8 +27,8 @@ public class ChatController : ControllerBase
         _chatService = chatService;
     }
 
-    [HttpPost("save")]
-    public async Task<IActionResult> SaveMessageToChannel([FromBody] ChannelMessage message)
+    [HttpPost]
+    public async Task<IActionResult> SaveMessageToChannel([FromBody] ChannelMessage? message)
     {
         HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
             
@@ -36,8 +37,9 @@ public class ChatController : ControllerBase
         await _chatService.SaveMessageToChannelAsync(message);
         return Ok();
     }
-    [HttpPut("update")]
-    public async Task<IActionResult> UpdateMessage([FromBody] ChannelMessage message)
+    
+    [HttpPut]
+    public async Task<IActionResult> UpdateMessage([FromBody] ChannelMessage? message)
     {
         HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
         if (message is null)
@@ -61,7 +63,7 @@ public class ChatController : ControllerBase
         return Ok(await _chatService.GetMessagesByChannelIdAsync(channelId));
     }
         
-    [HttpDelete("delete/{messageId:guid}")]
+    [HttpDelete("{messageId:guid}")]
     public async Task<IActionResult> DeleteMessageById(Guid messageId)
     {
         HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);

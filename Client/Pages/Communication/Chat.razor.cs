@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
+using MudBlazor;
 
 namespace Dovecord.Client.Pages.Communication;
 
@@ -43,6 +44,7 @@ public partial class Chat : IAsyncDisposable
             async (sender, args) => await SetIsTyping(false);
         
     [Inject] public Blazored.LocalStorage.ISyncLocalStorageService LocalStorage { get; set; }
+    [Inject] private IDialogService DialogService { get; set; }
     [Inject] public IJSRuntime JavaScript { get; set; }
     [Inject] public HttpClient Http { get; set; }
     [Inject] public ILogger<Chat> Log { get; set; }
@@ -223,6 +225,15 @@ public partial class Chat : IAsyncDisposable
         });
     }
 
+    async Task CreateChannel(string channelname)
+    {
+        if (channelname is { Length: > 0 })
+        {
+            await ChannelApi.CreateChannel(channelname);
+            _isOpen = false;   
+        }
+    }
+
     async Task LoadChannelChat(Channel channel)
     {
         await _hubConnection.InvokeAsync("RemoveChannelById", CurrentChannel.Id);
@@ -249,7 +260,7 @@ public partial class Chat : IAsyncDisposable
         }
         _navigationManager.NavigateTo($"{CGUID}");
     }
-
+    
     public async ValueTask DisposeAsync()
     {
         if (_debounceTimer is { })
@@ -270,5 +281,11 @@ public partial class Chat : IAsyncDisposable
         {
             await _hubConnection.DisposeAsync();
         }
+    }
+    
+    public bool _isOpen;
+    public void ToggleOpen()
+    {
+        _isOpen = !_isOpen;
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dovecord.Shared;
 
-namespace Dovecord.Data.Services;
+namespace Dovecord.Data.Interfaces;
 
 public interface IUserService
 {

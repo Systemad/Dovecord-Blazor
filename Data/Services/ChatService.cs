@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dovecord.Data.Interfaces;
 using Dovecord.Shared;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,4 +1,5 @@
 ﻿using Dovecord.Data;
+using Dovecord.Data.Interfaces;
 using Dovecord.Data.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -96,6 +97,7 @@ static class ServiceCollectionExtensions
     {
         services.AddTransient<IChatService, ChatService>();
         services.AddTransient<IUserService, UserService>();
+        services.AddTransient<IChannelService, ChannelService>();
         return services;
     }
 

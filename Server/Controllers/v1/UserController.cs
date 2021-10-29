@@ -1,9 +1,10 @@
 using Dovecord.Data;
+using Dovecord.Data.Interfaces;
 using Dovecord.Data.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Dovecord.Server.Controllers;
+namespace Dovecord.Server.Controllers.v1;
 
 [Authorize]
 [ApiController]

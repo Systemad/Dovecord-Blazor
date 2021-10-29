@@ -1,0 +1,7 @@
+<MudTextField @bind-Value="Channelname" Label="Channel name" Variant="Variant.Filled"></MudTextField>
+<MudButton OnClick="() => Createchannel.InvokeAsync(Channelname)" Color="Color.Error">Create channel</MudButton>
+@code {
+    public string Channelname { get; set; }
+    [Parameter] public EventCallback<string> Createchannel { get; set; }
+    
+}
