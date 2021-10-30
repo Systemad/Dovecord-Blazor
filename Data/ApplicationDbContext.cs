@@ -18,13 +18,13 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Channel>().HasData(new Channel
         {
             Id = channelguid,
-            ChannelName = "General"
+            Name = "General"
         });
             
         modelBuilder.Entity<Channel>().HasData(new Channel
         {
             Id = Guid.NewGuid(),
-            ChannelName = "Random",
+            Name = "Random",
         });
             
         modelBuilder.Entity<User>().HasData(new User

@@ -55,7 +55,7 @@ public class ChannelService : IChannelService
     public async Task<bool> UpdateChannelAsync(Channel channel)
     {
         var channelToUpdate = await GetChannelByIdAsync(channel.Id);
-        channelToUpdate.ChannelName = channel.ChannelName;
+        channelToUpdate.Name = channel.Name;
         var updated = await _context.SaveChangesAsync();
         return updated > 0;
     }

@@ -251,7 +251,7 @@ public partial class Chat : IAsyncDisposable
         var lastChannel = LocalStorage.ContainKey(CurrentUserId.ToString());
         if (!lastChannel) 
         {
-            CurrentChannel = Channels.First(a => a.ChannelName == "General");
+            CurrentChannel = Channels.First(a => a.Name == "General");
             CGUID = CurrentChannel.Id.ToString();
         }
         else {

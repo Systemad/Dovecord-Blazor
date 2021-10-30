@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
+#nullable disable
+
 namespace Dovecord.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
@@ -13,8 +15,7 @@ namespace Dovecord.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.10");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.0-rc.2.21480.5");
 
             modelBuilder.Entity("Dovecord.Shared.Channel", b =>
                 {
@@ -22,7 +23,7 @@ namespace Dovecord.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ChannelName")
+                    b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -32,13 +33,13 @@ namespace Dovecord.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("b6876e25-34c7-4749-aff7-19d116f4926d"),
-                            ChannelName = "General"
+                            Id = new Guid("9e999e73-1a25-4e40-bb4a-3013dbdeeff2"),
+                            Name = "General"
                         },
                         new
                         {
-                            Id = new Guid("5de94122-5ae6-451d-bcc2-61185547c859"),
-                            ChannelName = "Random"
+                            Id = new Guid("58c1d9ab-a564-428e-aaba-af356a207193"),
+                            Name = "Random"
                         });
                 });
 
@@ -77,10 +78,10 @@ namespace Dovecord.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e27eb46b-2885-45a7-98f2-15c048d9c64f"),
-                            ChannelId = new Guid("b6876e25-34c7-4749-aff7-19d116f4926d"),
+                            Id = new Guid("c6bbe9c9-dd31-46c5-be80-fd8001f5cea7"),
+                            ChannelId = new Guid("9e999e73-1a25-4e40-bb4a-3013dbdeeff2"),
                             Content = "First ever channel message",
-                            CreatedAt = new DateTime(2021, 10, 13, 17, 29, 11, 754, DateTimeKind.Local).AddTicks(8876),
+                            CreatedAt = new DateTime(2021, 10, 30, 16, 7, 34, 792, DateTimeKind.Local).AddTicks(3145),
                             IsEdit = false,
                             UserId = new Guid("ca0f4479-5992-4a00-a3d5-d73ae1daff6f"),
                             Username = "danova"

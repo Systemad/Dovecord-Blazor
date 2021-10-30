@@ -38,7 +38,7 @@ public class ChannelController : ControllerBase
         var channel = new Channel
         {
             Id = Guid.NewGuid(),
-            ChannelName = name,
+            Name = name,
         };
         await _channelService.CreateChannelAsync(channel);
         return Ok(channel);
