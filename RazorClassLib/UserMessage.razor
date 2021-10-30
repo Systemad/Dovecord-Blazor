@@ -1,35 +1,43 @@
-﻿<div id="@Id" class="d-flex flex-row my-4">
-    <div class="mr-4">
-        <MudAvatar Color="Color.Secondary" Style="height:50px; width:50px;">@ActorMessage.Username[0]</MudAvatar>
-        </div>
-     <div>
-         <MudText Style="display:inline" Typo="Typo.body1">@ActorMessage.Username</MudText>
-         <MudText Typo="Typo.caption" Style="font-size: xx-small!important;">@ActorMessage.CreatedAt</MudText>
-         @{
-             if (ActorMessage.IsEdit)
-             {
-                 <MudText Typo="Typo.caption" Style="font-size: xx-small!important;"> - Edited</MudText>
-             }
-         }
+﻿@{
+    if (ChannelMessages is null)
+    {
+        <LoadingMessage/>
+    }
+    else
+    {
+        foreach (var message in ChannelMessages)
+        {
+            <div id="@message.Id" class="d-flex flex-row my-4">
+                <div class="mr-4">
+                    <MudAvatar Color="Color.Secondary" Style="height:50px; width:50px;">@message.Username[0]</MudAvatar>
+                </div>
+                <div>
+                    <MudText Style="display:inline" Typo="Typo.body1">@message.Username</MudText>
+                    <MudText Typo="Typo.caption" Style="font-size: xx-small!important;">@message.CreatedAt</MudText>
+                    @{
+                        if (message.IsEdit)
+                        {
+                            <MudText Typo="Typo.caption" Style="font-size: xx-small!important;"> - Edited</MudText>
+                        }
+                    }
 
-         @if (ActorMessage.Username == ActualUser)
-         {
-             <MudMenu Style="display:inline" Icon="@Icons.Material.Filled.MoreVert" Dense="true">
-                 <MudMenuItem OnClick="() => EditMessage.InvokeAsync(ActorMessage)">Edit</MudMenuItem>
-                 <MudMenuItem OnClick="() => DeleteMessage.InvokeAsync(ActorMessage)">Delete</MudMenuItem>
-             </MudMenu>
-         }
-         
-         <MudText Typo="Typo.body2" Style=" padding: 10px;background-color: var(--mud-palette-background-grey);border-radius: 5px">@ActorMessage.Content</MudText>
-     </div>
-</div>
-
+                    @if (message.Username == ActualUser)
+                    {
+                        <MudMenu Style="display:inline" Icon="@Icons.Material.Filled.MoreVert" Dense="true">
+                            <MudMenuItem OnClick="() => EditMessage.InvokeAsync(message)">Edit</MudMenuItem>
+                            <MudMenuItem OnClick="() => DeleteMessage.InvokeAsync(message)">Delete</MudMenuItem>
+                        </MudMenu>
+                    }
+                    <MudText Typo="Typo.body2" Style=" padding: 10px;background-color: var(--mud-palette-background-grey);border-radius: 5px">@message.Content</MudText>
+                </div>
+            </div>
+        }
+    }
+}
 
 @code {
-    // TODO: Display if message id edited
+    [Parameter] public List<ChannelMessage> ChannelMessages { get; set; }
     [Parameter] public string ActualUser { get; set; }
-    [Parameter] public string Id { get; set; }
-    [Parameter] public ChannelMessage ActorMessage { get; set; }
     [Parameter] public EventCallback <ChannelMessage> EditMessage { get; set; }
     [Parameter] public EventCallback <ChannelMessage> DeleteMessage { get; set; }
 

@@ -5,22 +5,11 @@
         <MudPaper Elevation="25" Class="pa-3 mr-6" MinWidth="250px">
             <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Secondary" FullWidth="true" OnClick="@ToggleOpen">Create Channel</MudButton>
             <MudPopover Open="@_isOpen" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-            		<div class="d-flex flex-column pa-1">
-            			<CreateChannel Createchannel="CreateChannel" />
-            		</div>
-            	</MudPopover>
-            <MudList Clickable="true">
-                @{
-                    if (Channels is null)
-                    {
-                        <ChannelLoading/>
-                    }
-                    foreach (var channel in Channels)
-                    {
-                        <MudListItem Dense="true" OnClick="@(() =>LoadChannelChat(channel))"># @channel.Name</MudListItem>
-                    }
-                }
-            </MudList>
+                <div class="d-flex flex-column pa-1">
+                    <CreateChannel Createchannel="CreateChannel" />
+                </div>
+            </MudPopover>
+            <Channels ChannelList="Channels" LoadChannelChat="LoadChannelChat"/>
         </MudPaper>
     </MudHidden>
     <MudPaper Elevation="25" Class="py-4 flex-grow-1">
@@ -31,7 +20,7 @@
             @{
                 if (CurrentChannel is not null)
                 {
-                    <MudText Typo="Typo.h6" Inline="true" Class="mr-2"># @CurrentChannel.Name </MudText>   
+                    <MudText Typo="Typo.h6" Inline="true" Class="mr-2"># @CurrentChannel.Name</MudText>   
                 }
             }
             <MudText Typo="Typo.h6">@headline</MudText>
@@ -43,23 +32,12 @@
             </MudHidden>
         </MudToolBar>
         <div class="d-flex flex-column px-4" style="max-height:65vh;min-height:65vh; overflow:scroll;" id="chatContainer">
-            @{
-                @if (_messages is null)
-                {
-                    <LoadingMessage />
-                }
-                else
-                {
-                    @foreach (var message in _messages)
-                    {
-                        <UserMessage Id="@message.Id.ToString()" ActorMessage="message"
-                                     DeleteMessage="@DeleteMessageById"
-                                     ActualUser="@CurrentUsername"
-                                     EditMessage="@StartEdit"/>
-                    }
-                }
-            }
-        </div>
+            <UserMessage
+                ChannelMessages="_messages"
+                DeleteMessage="@DeleteMessageById"
+                ActualUser="@CurrentUsername"
+                EditMessage="@StartEdit"/>
+            </div>
         <MudPaper Elevation="0" Style="margin-left: 15px">
             @{
                 static string UsersTypingText(string[] usersTyping) => usersTyping?.Length switch
