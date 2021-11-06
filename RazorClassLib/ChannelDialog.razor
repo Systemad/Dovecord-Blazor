@@ -1,0 +1,39 @@
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
+            Delete Channel?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField Value="@Channel.Id.ToString()" Label="Channel ID" ReadOnly="true"/>
+        <MudTextField Value="@Channel.Name" Label="Server Channel" ReadOnly="true"/>
+    @*
+        <MudTextField Value="@channel.Location" Label="Location" ReadOnly="true"/>
+        <MudTextField Value="@channel.IpAddress" Label="IP Address" ReadOnly="true"/>
+    *@
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteChannel">Delete Channel</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public Channel Channel { get; set; } = new Channel();
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void DeleteChannel()
+    {
+    //In a real world scenario this bool would probably be a service to delete the item from api/database
+        Snackbar.Add("Channel Deleted", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(Channel.Id));
+    }
+}

@@ -1,0 +1,61 @@
+@using Dovecord.Shared
+
+@inject IJSRuntime JSRuntime
+
+<div class="d-flex flex-grow-1 flex-row">
+    <MudPaper Elevation="25" Class="py-4 flex-grow-1">
+        <div class="d-flex flex-column px-4" style="max-height:82vh;min-height:82vh; overflow:scroll;">
+            
+            
+        </div>
+    </MudPaper>
+</div>
+
+@code{
+
+    
+    [Parameter]
+    public IEnumerable<Channel> Channels { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid> OnEditClick { get; set; }
+
+    private Channel _channel = new();
+    private string _modalDisplay = "none;";
+    private string _modalClass = "";
+    private bool _showDetailsModal = false;
+
+    public async Task EditClick()
+    {
+        await OnEditClick.InvokeAsync(_channel.Id);
+        await Close();
+    }
+    
+    public async Task Open(int id)
+    {
+
+        //Logger.LogInformation("Now loading... /Catalog/Details/{Id}", id);
+
+        //await new Css(JSRuntime).HideBodyOverflow();
+
+        //_item = await CatalogItemService.GetById(id);
+
+        _modalDisplay = "block;";
+        _modalClass = "Show";
+        _showDetailsModal = true;
+
+        StateHasChanged();
+    }
+
+    public async Task Close()
+    {
+        //await new Css(JSRuntime).ShowBodyOverflow();
+
+        _modalDisplay = "none";
+        _modalClass = "";
+        _showDetailsModal = false;
+    }
+    
+}
+
+

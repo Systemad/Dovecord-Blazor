@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Timers;
 using Dovecord.Client.Extensions;
+using Dovecord.Client.Pages.Management;
 using Dovecord.Client.Services;
 using Dovecord.Shared;
 using Microsoft.AspNetCore.Components;
@@ -33,6 +34,7 @@ public partial class Chat : IAsyncDisposable
 
     Guid _messageId;
     bool _isTyping;
+    private string _createChannel;
     private List<Channel> Channels { get; set; } = new();
     private List<User> Users { get; set; }
     ActorCommand _lastCommand;
@@ -51,6 +53,8 @@ public partial class Chat : IAsyncDisposable
     [Inject] private IChannelApi ChannelApi { get; set; }
     [Inject] private IChatApi ChatApi { get; set; }
     [Inject] public IAccessTokenProvider TokenProvider { get; set; }
+    
+    [Inject] public ISnackbar Snackbar { get; set; }
 
     private string isTypingMarkup;
     private string placeholder;
@@ -95,7 +99,7 @@ public partial class Chat : IAsyncDisposable
         StateHasChanged();
     });
 
-    private async Task OnMessageReceivedAsync(ChannelMessage message) =>
+    async Task OnMessageReceivedAsync(ChannelMessage message) =>
         await InvokeAsync(
             async () =>
             {
@@ -126,7 +130,7 @@ public partial class Chat : IAsyncDisposable
             StateHasChanged();
         });
         
-    private async Task OnUserListReceived(List<User> users) =>
+    async Task OnUserListReceived(List<User> users) =>
         await InvokeAsync(
             async () =>
             {
@@ -181,19 +185,15 @@ public partial class Chat : IAsyncDisposable
         {
             return;
         }
-
-        Log.LogInformation($"Setting is typing: {isTyping}");
-
         await _hubConnection.InvokeAsync("UserTyping", _isTyping = isTyping);
     }
 
-    async Task AppendToMessage(string text)
+    async Task AppendToMessage(string text) // for emoji
     {
         _messageInput += text;
         await SetIsTyping(false);
     }
-        
-        
+    
     async Task StartEdit(ChannelMessage message)
     {
         if (message.Username != CurrentUsername)
@@ -214,7 +214,6 @@ public partial class Chat : IAsyncDisposable
     {
         if (message.Username != CurrentUsername)
         {
-            Console.WriteLine("Message not owned by user");
             return;
         }
 
@@ -224,21 +223,11 @@ public partial class Chat : IAsyncDisposable
             await ChatApi.DeleteMessageById(message.Id);
         });
     }
-
-    async Task CreateChannel(string channelname)
-    {
-        if (channelname is { Length: > 0 })
-        {
-            await ChannelApi.CreateChannel(channelname);
-            _isOpen = false;   
-        }
-    }
-
     async Task LoadChannelChat(Channel channel)
     {
         await _hubConnection.InvokeAsync("RemoveChannelById", CurrentChannel.Id);
         await _hubConnection.InvokeAsync("JoinChannelById", channel.Id);
-        _messages = await ChannelApi.MessagesFomChannelId(channel.Id);
+        _messages = await ChannelApi.GetMessagesFomChannelAsync(channel.Id);
         CGUID = channel.Id.ToString();
         CurrentChannel = channel;
         LocalStorage.SetItem(CurrentUserId.ToString(), CGUID);
@@ -247,7 +236,7 @@ public partial class Chat : IAsyncDisposable
         
     async Task LoadChannelInfo()
     {
-        Channels = await ChannelApi.ChannelList();
+        Channels = await ChannelApi.GetChannelsAsync();
         var lastChannel = LocalStorage.ContainKey(CurrentUserId.ToString());
         if (!lastChannel) 
         {
@@ -287,5 +276,30 @@ public partial class Chat : IAsyncDisposable
     public void ToggleOpen()
     {
         _isOpen = !_isOpen;
+    }
+    // TODO: Send update with Hubs and do StateHasChanged(). then call 
+    // Channels = await ChannelApi.GetChannelsAsync(); or LoadChannelInfo() method
+    async Task CreateChannelAsync(string channel)
+    {
+        var parameters = new DialogParameters { ["channel"]=channel };
+        var dialog = DialogService.Show<CreateDialog>("Create Channel", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            var tempchannel = result.Data;
+            if ((string)tempchannel is { Length: > 0 } && Channels.Any(c => c.Name != (string)tempchannel))
+            {
+                var newChannel = await ChannelApi.CreateChannelAsync((string)tempchannel);
+                Channels.Add(newChannel);
+            }
+        }
+        _createChannel = string.Empty;
+        StateHasChanged();
+    }
+
+    private void NavigateChannelSettings()
+    {
+        _navigationManager.NavigateTo("admin/channels");
     }
 }

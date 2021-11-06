@@ -3,12 +3,10 @@
 <div class="d-flex flex-grow-1 flex-row">
     <MudHidden Breakpoint="Breakpoint.SmAndDown">
         <MudPaper Elevation="25" Class="pa-3 mr-6" MinWidth="250px">
-            <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Secondary" FullWidth="true" OnClick="@ToggleOpen">Create Channel</MudButton>
-            <MudPopover Open="@_isOpen" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-                <div class="d-flex flex-column pa-1">
-                    <CreateChannel Createchannel="CreateChannel" />
-                </div>
-            </MudPopover>
+            <MudTooltip Text="Channel management">
+                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="@((e) => CreateChannelAsync(_createChannel))"/>
+                <MudIconButton Icon="@Icons.Material.Filled.Settings" OnClick="NavigateChannelSettings"/>
+            </MudTooltip>
             <Channels ChannelList="Channels" LoadChannelChat="LoadChannelChat"/>
         </MudPaper>
     </MudHidden>
@@ -73,7 +71,6 @@
     @if (ChatDrawer == Anchor.Left)
     {
         <MudButton EndIcon="@Icons.Material.Filled.Add" Color="Color.Secondary" Class="mx-4 mt-6 mb-4">Create Channel</MudButton>
-        <ChatChannels Channels="_channels" />
     }
     else if (ChatDrawer == Anchor.Right)
     {

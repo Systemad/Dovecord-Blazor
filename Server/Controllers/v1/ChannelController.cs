@@ -43,4 +43,33 @@ public class ChannelController : ControllerBase
         await _channelService.CreateChannelAsync(channel);
         return Ok(channel);
     }
+    
+    [HttpDelete("{channelId:guid}")]
+    public async Task<IActionResult> DeleteChannelById(Guid channelId)
+    {
+        HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+        //var o = await _chatService.UserOwnsMessageAsync(messageId, HttpContext.GetUserId());
+
+        //if (!ownsmessage)
+        //    return BadRequest(new {error = "User does not own message"});
+
+        var channeldeleted = await _channelService.DeleteChannelAsync(channelId);
+        return channeldeleted ? NoContent() : NotFound();
+    }
+    
+    [HttpPut]
+    public async Task<IActionResult> UpdateChannel([FromBody] Channel? channel)
+    {
+        HttpContext.VerifyUserHasAnyAcceptedScope(scopeRequiredByApi);
+        if (channel is null)
+            return BadRequest();
+            
+        //var ownsmessage = await _chatService.UserOwnsMessageAsync(message.Id, HttpContext.GetUserId());
+
+        //if (!ownsmessage)
+        //    return BadRequest(new {error = "User does not own message"});
+
+        await _channelService.UpdateChannelAsync(channel);
+        return Ok();
+    }
 }

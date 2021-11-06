@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 
-
-// TODO: Refactor Controller to .NET 6 style
 // TODO: Refactor controller implementation i.e add error codes etc
 namespace Dovecord.Server.Controllers.v1;
 

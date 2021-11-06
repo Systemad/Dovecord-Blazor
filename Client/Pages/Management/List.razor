@@ -1,0 +1,83 @@
+@page "/admin/channels"
+@using Dovecord.Shared
+@using Dovecord.Client.Services
+@using System.Text.Json.Serialization
+@using System.Text.Json
+@inject HttpClient httpClient
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<div class="d-flex flex-grow-1 flex-row">
+    <MudPaper Elevation="25" Class="py-4 flex-grow-1">
+        <div class="d-flex flex-column px-4" style="max-height:82vh;min-height:82vh; overflow:scroll;">
+            <MudButton EndIcon="@Icons.Filled.Add"></MudButton>
+            <MudExpansionPanels MultiExpansion="false">
+                @{
+                    foreach (var channel in Channels)
+                    {
+                        <MudExpansionPanel Text="@channel.Name">
+                            <MudButton OnClick="@((e) => UpdateChannel(channel))">Edit</MudButton>
+                            <MudButton OnClick="@((e) => DeleteServer(channel))">Delete</MudButton>
+                        </MudExpansionPanel>
+                    }
+                }
+            </MudExpansionPanels>
+        </div>
+    </MudPaper>
+</div>
+
+@code {
+    private List<string> editEvents = new();
+    private string searchString = "";
+    private string createString = "";
+    private Channel selectedItem1 = null;
+    private Channel selectedItem2 = null;
+
+    private List<Channel> Channels = new List<Channel>();
+    
+    [Inject] private IChannelApi ChannelApi { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Channels = await ChannelApi.GetChannelsAsync();
+    }
+
+    async Task DeleteServer(Channel channel)
+    {
+        var parameters = new DialogParameters { ["channel"]=channel };
+
+        var dialog = DialogService.Show<ChannelDialog>("Delete Channel", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            //In a real world scenario we would reload the data from the source here since we "removed" it in the dialog already.
+            Guid.TryParse(result.Data.ToString(), out Guid deletedServer);
+            await ChannelApi.DeleteChannelAsync(deletedServer);
+            Channels.RemoveAll(item => item.Id == deletedServer);
+        }
+        StateHasChanged();
+    }
+    
+    async Task UpdateChannel(Channel channel)
+    {
+        var parameters = new DialogParameters { ["channel"]=channel };
+
+        var dialog = DialogService.Show<EditDialog>("Update Channel", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            var tempchannel = result.Data;
+            await ChannelApi.UpdateChannelAsync((Channel)tempchannel);
+        }
+        StateHasChanged();
+    }
+
+    private void AddEditionEvent(string message)
+    {
+        Snackbar.Add($"RowEditCommit event: Changes to Element committed");
+        editEvents.Add(message);
+        StateHasChanged();
+    }
+}
