@@ -15,7 +15,7 @@ namespace Dovecord.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.0-rc.2.21480.5");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.0");
 
             modelBuilder.Entity("Dovecord.Shared.Channel", b =>
                 {
@@ -33,12 +33,12 @@ namespace Dovecord.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("9e999e73-1a25-4e40-bb4a-3013dbdeeff2"),
+                            Id = new Guid("8200a638-c9c0-43d0-909a-a89ddbd94c39"),
                             Name = "General"
                         },
                         new
                         {
-                            Id = new Guid("58c1d9ab-a564-428e-aaba-af356a207193"),
+                            Id = new Guid("062fe79b-61eb-4d21-8085-52a7cf954e13"),
                             Name = "Random"
                         });
                 });
@@ -78,10 +78,10 @@ namespace Dovecord.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("c6bbe9c9-dd31-46c5-be80-fd8001f5cea7"),
-                            ChannelId = new Guid("9e999e73-1a25-4e40-bb4a-3013dbdeeff2"),
+                            Id = new Guid("7edec147-cdfe-4356-80d0-08fa9faec9ea"),
+                            ChannelId = new Guid("8200a638-c9c0-43d0-909a-a89ddbd94c39"),
                             Content = "First ever channel message",
-                            CreatedAt = new DateTime(2021, 10, 30, 16, 7, 34, 792, DateTimeKind.Local).AddTicks(3145),
+                            CreatedAt = new DateTime(2021, 11, 9, 20, 17, 44, 578, DateTimeKind.Local).AddTicks(4911),
                             IsEdit = false,
                             UserId = new Guid("ca0f4479-5992-4a00-a3d5-d73ae1daff6f"),
                             Username = "danova"

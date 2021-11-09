@@ -1,4 +1,3 @@
-using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -10,15 +9,22 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Applicatio
         
     public ApplicationDbContext CreateDbContext(string[] args)
     {
+        /*
         IConfigurationRoot configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", true)
+            .AddJsonFile("/../Server/appsettings.json", true)
             .Build(); 
-            
+            */
+        IConfigurationRoot configuration = 
+            new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile(@Directory.GetCurrentDirectory() + "/../Server/appsettings.json")
+                .Build();
+        
         var builder = new DbContextOptionsBuilder(); 
-        var connectionString = configuration.GetConnectionString("DatabaseConnection"); 
-        builder.UseSqlite("Data Source=DovecordHQ.db",
-            x => x.MigrationsAssembly(typeof(DesignTimeDbContextFactory).Assembly.FullName));
+        var connectionString = configuration.GetConnectionString("DatabaseConnection");
+        builder.UseSqlite(connectionString);
+            //x => x.MigrationsAssembly(typeof(DesignTimeDbContextFactory).Assembly.FullName));
         return new ApplicationDbContext(builder.Options); 
     }
 }

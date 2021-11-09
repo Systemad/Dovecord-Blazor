@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Dovecord.Data.Interfaces;
 using Dovecord.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -38,11 +34,11 @@ public class ChannelService : IChannelService
     public async Task<bool> CreateChannelAsync(Channel channel)
     {
         var count = await _context.Channels.CountAsync();
-        
-        if(count < 10)
-            await _context.Channels.AddAsync(channel);
+        if (count > 10)
+            return false;
         
         // Add error code
+        await _context.Channels.AddAsync(channel);
         var created = await _context.SaveChangesAsync();
         return created > 0;
     }
@@ -54,7 +50,8 @@ public class ChannelService : IChannelService
 
     public async Task<bool> UpdateChannelAsync(Channel channel)
     {
-        var channelToUpdate = await GetChannelByIdAsync(channel.Id);
+        var channelToUpdate = await _context.Channels.Where(x => x.Id == channel.Id)
+            .AsTracking().SingleOrDefaultAsync();
         channelToUpdate.Name = channel.Name;
         var updated = await _context.SaveChangesAsync();
         return updated > 0;

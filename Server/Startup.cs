@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 const string CorsPolicy = nameof(CorsPolicy);
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
-builder.Services.AddDatabase();
+builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddAppAuthentication(builder.Configuration);
 builder.Services.AddCors(options =>

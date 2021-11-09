@@ -102,8 +102,14 @@ static class ServiceCollectionExtensions
     }
 
     internal static IServiceCollection AddDatabase(
-        this IServiceCollection services)
-        => services
-            .AddDbContext<ApplicationDbContext>(options => options
-                .UseSqlite("Data Source=..\\Data\\DovecordHQ.db"));
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+                options.UseSqlite(configuration.GetConnectionString("DatabaseConnection"));
+            });
+        return services;
+    }
 }

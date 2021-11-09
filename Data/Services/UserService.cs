@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Dovecord.Data.Interfaces;
 using Dovecord.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +24,7 @@ public class UserService : IUserService
         {
             Id = userId,
             Username = username,
-            Online = false
+            Online = true
         };
             
         await _context.Users.AddAsync(newUser);
@@ -43,7 +40,7 @@ public class UserService : IUserService
 
     public async Task<bool> UserLoggedOnAsync(Guid userId)
     {
-        var user = await GetUserByIdAsync(userId);
+        var user = await _context.Users.Where(x => x.Id == userId).AsTracking().SingleOrDefaultAsync();
         //_context.Attach(user);
         user.Online = true;
         //_context.Update(user);
@@ -53,7 +50,7 @@ public class UserService : IUserService
 
     public async Task<bool> UserLoggedOffAsync(Guid userId)
     {
-        var user = await GetUserByIdAsync(userId);
+        var user = await _context.Users.Where(x => x.Id == userId).AsTracking().SingleOrDefaultAsync();
         //_context.Attach(user);
         user.Online = false;
         //_context.Update(user);
