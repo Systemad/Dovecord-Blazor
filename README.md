@@ -3,13 +3,16 @@
 
 Chat application inspired by Discord made with Blazor, Entity Framework, SignalR with Azure Active Drirectory Authentication.
 
-## Proper readme is in heavy progress 
+## Demo
+
+https://user-images.githubusercontent.com/8531546/147357258-adfe0132-3f72-41cd-8b13-37d2646969d7.mp4
+
 
 ## Features
 
-- Account login / registration
-- Ability to Send / Edit / Delete messages
-- Ability to Create / Edit / Delete channels
+- Account login / registration with Azure Active Directoty
+- Ability to Send/edit/delete messages
+- Ability to Create/edit/delete channels
 
 ## Plannes Features
 - Roles (admin, user)
@@ -17,10 +20,6 @@ Chat application inspired by Discord made with Blazor, Entity Framework, SignalR
 - Tagging ability
 - Notifications
 - User profile management (bio, profile picture, nickname)
-
-## Demo
-
-Insert gif or link to demo
 
 ## Run Locally
 
