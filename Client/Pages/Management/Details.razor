@@ -1,5 +1,4 @@
-@using Dovecord.Shared
-
+@using Dovecord.Client.Shared.DTO.Channel
 @inject IJSRuntime JSRuntime
 
 <div class="d-flex flex-grow-1 flex-row">
@@ -15,12 +14,12 @@
 
     
     [Parameter]
-    public IEnumerable<Channel> Channels { get; set; }
+    public IEnumerable<ChannelDto> Channels { get; set; }
 
     [Parameter]
     public EventCallback<Guid> OnEditClick { get; set; }
 
-    private Channel _channel = new();
+    private ChannelDto _channel = new();
     private string _modalDisplay = "none;";
     private string _modalClass = "";
     private bool _showDetailsModal = false;

@@ -1,6 +1,5 @@
-using System;
 using System.Threading.Tasks;
-using Dovecord.Shared;
+using Dovecord.Client.Shared.DTO.User;
 using Refit;
 
 namespace Dovecord.Client.Services;
@@ -8,5 +7,5 @@ namespace Dovecord.Client.Services;
 public interface IUserApi
 {
     [Post("/User/connect")]
-    Task SendConnectedUser(User user);
+    Task SendConnectedUser(UserDto user);
 }

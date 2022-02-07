@@ -2,7 +2,6 @@ using System;
 using System.Net.Http;
 using Blazored.LocalStorage;
 using Dovecord.Client.Services;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -19,13 +18,13 @@ public static class WasmHostExtension
         builder.Services.AddHttpClient("Dovecord.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
             .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
         builder.Services.AddRefitClient<IChannelApi>()
-            .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:5001/api"); })
+            .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:7045/api/channels"); })
             .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
-        builder.Services.AddRefitClient<IChatApi>()
-            .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:5001/api"); })
+        builder.Services.AddRefitClient<IMessageApi>()
+            .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:7045/api/messages"); })
             .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
         builder.Services.AddRefitClient<IUserApi>()
-            .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:5001/api"); })
+            .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:7045/api"); })
             .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
         builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Dovecord.ServerAPI"));

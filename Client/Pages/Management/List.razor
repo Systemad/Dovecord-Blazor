@@ -1,8 +1,7 @@
 @page "/admin/channels"
-@using Dovecord.Shared
 @using Dovecord.Client.Services
-@using System.Text.Json.Serialization
-@using System.Text.Json
+@using Dovecord.Client.Shared.DTO.Channel
+@using Dovecord.Client.Shared.RazorComponents.Channel
 @inject HttpClient httpClient
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
@@ -30,10 +29,10 @@
     private List<string> editEvents = new();
     private string searchString = "";
     private string createString = "";
-    private Channel selectedItem1 = null;
-    private Channel selectedItem2 = null;
+    private ChannelDto selectedItem1 = null;
+    private ChannelDto selectedItem2 = null;
 
-    private List<Channel> Channels = new List<Channel>();
+    private List<ChannelDto> Channels = new ();
     
     [Inject] private IChannelApi ChannelApi { get; set; }
     
@@ -42,7 +41,7 @@
         Channels = await ChannelApi.GetChannelsAsync();
     }
 
-    async Task DeleteServer(Channel channel)
+    async Task DeleteServer(ChannelDto channel)
     {
         var parameters = new DialogParameters { ["channel"]=channel };
 
@@ -59,17 +58,21 @@
         StateHasChanged();
     }
     
-    async Task UpdateChannel(Channel channel)
+    async Task UpdateChannel(ChannelDto channel)
     {
         var parameters = new DialogParameters { ["channel"]=channel };
 
         var dialog = DialogService.Show<EditDialog>("Update Channel", parameters);
         var result = await dialog.Result;
 
+        var channelManipulationDto = new ChannelManipulationDto
+        {
+            Name = channel.Name
+        };
         if (!result.Cancelled)
         {
             var tempchannel = result.Data;
-            await ChannelApi.UpdateChannelAsync((Channel)tempchannel);
+            await ChannelApi.UpdateChannelAsync(channel.Id, channelManipulationDto);
         }
         StateHasChanged();
     }

@@ -1,3 +1,5 @@
+@using Dovecord.Client.Shared.DTO.Message
+@using Dovecord.Client.Shared.DTO.Channel
 @inject ISnackbar Snackbar
 
 <MudDialog>
@@ -17,7 +19,7 @@
 </MudDialog>
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-    [Parameter] public EventCallback<string> CreateChannelCallback { get; set; }
+    [Parameter] public EventCallback<ChannelManipulationDto> CreateChannelCallback { get; set; }
     [Parameter] public string Channel { get; set; }
     
     private void Cancel()
@@ -27,7 +29,12 @@
 
     private async Task CreateChannel()
     {
-        await CreateChannelCallback.InvokeAsync(Channel);
+        var newChannel = new ChannelManipulationDto()
+        {
+            Name = Channel
+        };
+        
+        await CreateChannelCallback.InvokeAsync(newChannel);
         Snackbar.Add("Channel created", Severity.Success);
         MudDialog.Close(DialogResult.Ok(Channel));
     }

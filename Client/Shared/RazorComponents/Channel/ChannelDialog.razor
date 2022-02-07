@@ -5,48 +5,37 @@
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
-            Edit Channel?
+            Delete Channel?
         </MudText>
     </TitleContent>
     <DialogContent>
         <MudTextField Value="@Channel.Id.ToString()" Label="Channel ID" ReadOnly="true"/>
-        <MudTextField @bind-Value="ChannelName" Label="Channel Name" ReadOnly="false"/>
-        @*
+        <MudTextField Value="@Channel.Name" Label="Server Channel" ReadOnly="true"/>
+    @*
         <MudTextField Value="@channel.Location" Label="Location" ReadOnly="true"/>
         <MudTextField Value="@channel.IpAddress" Label="IP Address" ReadOnly="true"/>
     *@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Error" OnClick="EditChannel">Confirm changes</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteChannel">Delete Channel</MudButton>
     </DialogActions>
 </MudDialog>
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    [Parameter] public EventCallback<ChannelDto> EditChannelCallback { get; set; }
-    [Parameter] public ChannelDto Channel { get; set; } = new ChannelDto();
-
-    private string ChannelName = "";
-
-    
-    protected override void OnInitialized()
-    {
-        ChannelName = Channel.Name;
-    }
-    
+    [Parameter]
+    public ChannelDto Channel { get; set; } = new();
 
     private void Cancel()
     {
         MudDialog.Cancel();
     }
 
-    private async Task EditChannel()
+    private void DeleteChannel()
     {
-        //Channel.Name = ChannelName;
-        Channel.Name = ChannelName;
-        await EditChannelCallback.InvokeAsync(Channel);
-        Snackbar.Add("Channel edited", Severity.Success);
-        MudDialog.Close(DialogResult.Ok(Channel));
+    //In a real world scenario this bool would probably be a service to delete the item from api/database
+        Snackbar.Add("Channel Deleted", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(Channel.Id));
     }
 }

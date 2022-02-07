@@ -35,7 +35,8 @@
                 DeleteMessage="@DeleteMessageById"
                 ActualUser="@CurrentUsername"
                 EditMessage="@StartEdit"/>
-            </div>
+        </div>
+    @*
         <MudPaper Elevation="0" Style="margin-left: 15px">
             @{
                 static string UsersTypingText(string[] usersTyping) => usersTyping?.Length switch
@@ -52,6 +53,7 @@
                 //</span>
             }
         </MudPaper>
+        *@
         <MudPaper Elevation="25" Class="d-flex flex-row px-2 mx-4" Style="">
             <MudIconButton Icon="@Icons.Material.Filled.AddCircle"></MudIconButton>
             

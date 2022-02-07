@@ -1,0 +1,20 @@
+@using Dovecord.Client.Shared.DTO.Channel
+
+<MudList Clickable="true">
+    @{
+        if (ChannelList is null)
+        {
+            <ChannelLoading/>
+        }
+        foreach (var channel in ChannelList)
+        {
+            <MudListItem Dense="true" OnClick="() => LoadChannelChat.InvokeAsync(channel)"># @channel.Name</MudListItem>
+        }
+    }
+</MudList>
+
+@code
+{
+    [Parameter] public List<ChannelDto> ChannelList { get; set; }
+    [Parameter] public EventCallback<ChannelDto> LoadChannelChat { get; set; }
+}

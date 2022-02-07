@@ -2,12 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Timers;
 using Dovecord.Client.Extensions;
 using Dovecord.Client.Pages.Management;
 using Dovecord.Client.Services;
-using Dovecord.Shared;
+using Dovecord.Client.Shared.DTO.Actor;
+using Dovecord.Client.Shared.DTO.Channel;
+using Dovecord.Client.Shared.DTO.Message;
+using Dovecord.Client.Shared.DTO.User;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -20,7 +24,7 @@ namespace Dovecord.Client.Pages.Communication;
 
 public partial class Chat : IAsyncDisposable
 {
-    List<ChannelMessage> _messages;
+    List<ChannelMessageDto> _messages;
     readonly HashSet<Actor> _usersTyping = new();
     readonly HashSet<IDisposable> _hubRegistrations = new();
     readonly Timer _debounceTimer = new()
@@ -29,14 +33,14 @@ public partial class Chat : IAsyncDisposable
         AutoReset = false
     };
 
-    private Channel CurrentChannel { get; set; }
+    private ChannelDto CurrentChannel { get; set; }
     HubConnection _hubConnection;
 
     Guid _messageId;
     bool _isTyping;
     private string _createChannel;
-    private List<Channel> Channels { get; set; } = new();
-    private List<User> Users { get; set; }
+    private List<ChannelDto> Channels { get; set; } = new();
+    private List<UserDto> Users { get; set; }
     ActorCommand _lastCommand;
     [Parameter] public string _messageInput { get; set; }
     [Parameter] public string CGUID { get; set; }
@@ -51,7 +55,7 @@ public partial class Chat : IAsyncDisposable
     [Inject] public HttpClient Http { get; set; }
     [Inject] public ILogger<Chat> Log { get; set; }
     [Inject] private IChannelApi ChannelApi { get; set; }
-    [Inject] private IChatApi ChatApi { get; set; }
+    [Inject] private IMessageApi MessageApi { get; set; }
     [Inject] public IAccessTokenProvider TokenProvider { get; set; }
     
     [Inject] public ISnackbar Snackbar { get; set; }
@@ -74,7 +78,7 @@ public partial class Chat : IAsyncDisposable
         _hubRegistrations.Add(_hubConnection.OnMessageReceived(OnMessageReceivedAsync));
         _hubRegistrations.Add(_hubConnection.OnUserTyping(OnUserTypingAsync));
         _hubRegistrations.Add(_hubConnection.OnDeleteMessageReceived(OnDeleteMessageReceived));
-        _hubRegistrations.Add(_hubConnection.OnUserListReceived(OnUserListReceived));
+        _hubRegistrations.Add(_hubConnection.DataRefresh(OnChannelHasChanged));
         await _hubConnection.StartAsync();
 
         var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
@@ -92,14 +96,14 @@ public partial class Chat : IAsyncDisposable
         return result.TryGetToken(out var accessToken) ? accessToken.Value : null;
     }
 
-    async Task OnDeleteMessageReceived(Guid messageId) => await InvokeAsync(async () =>
+    async Task OnDeleteMessageReceived(string messageId) => await InvokeAsync(async () =>
     {
-        _messages.Remove(_messages.First(a => a.Id == messageId));
+        _messages.Remove(_messages.First(a => a.Id == Guid.Parse(messageId)));
         await JavaScript.ScrollIntoViewAsync();
         StateHasChanged();
     });
 
-    async Task OnMessageReceivedAsync(ChannelMessage message) =>
+    async Task OnMessageReceivedAsync(ChannelMessageDto message) =>
         await InvokeAsync(
             async () =>
             {
@@ -112,7 +116,7 @@ public partial class Chat : IAsyncDisposable
                 {
                     newmessage.IsEdit = true;
                     newmessage.Content = message.Content;
-                    newmessage.CreatedAt = message.CreatedAt;
+                    newmessage.CreatedBy = message.CreatedBy;
                 }
                 await JavaScript.ScrollIntoViewAsync();
                 StateHasChanged();
@@ -130,11 +134,19 @@ public partial class Chat : IAsyncDisposable
             StateHasChanged();
         });
         
-    async Task OnUserListReceived(List<User> users) =>
+    async Task OnUserListReceived(List<UserDto> users) =>
         await InvokeAsync(
             async () =>
             {
                 Users = users;
+                StateHasChanged();
+            });
+    
+    async Task OnChannelHasChanged() =>
+        await InvokeAsync(
+            async () =>
+            {
+                await LoadChannelInfo();
                 StateHasChanged();
             });
 
@@ -142,17 +154,12 @@ public partial class Chat : IAsyncDisposable
     {
         if (_messageInput is { Length: > 0 })
         {
-            var channelmessage = new ChannelMessage
+            var channelmessage = new MessageManipulationDto
             {
-                Id = _messageId,
                 Content = _messageInput,
-                CreatedAt = DateTime.Now,
-                IsEdit = false,
-                Username = CurrentUsername,
-                UserId = CurrentUserId,
                 ChannelId = CurrentChannel.Id
             };
-
+            /*
             if (_messageId == Guid.Empty)
             {
                 channelmessage.Id = Guid.NewGuid();
@@ -162,8 +169,8 @@ public partial class Chat : IAsyncDisposable
             {
                 await ChatApi.UpdateMessage(channelmessage);     
             }
-                
-            await _hubConnection.InvokeAsync("PostMessage", channelmessage, CurrentChannel.Id);
+            */    
+            //await _hubConnection.InvokeAsync("PostMessage", channelmessage, CurrentChannel.Id);
             _messageInput = null;
             _messageId = Guid.Empty;
             StateHasChanged();
@@ -194,9 +201,9 @@ public partial class Chat : IAsyncDisposable
         await SetIsTyping(false);
     }
     
-    async Task StartEdit(ChannelMessage message)
+    async Task StartEdit(ChannelMessageDto message)
     {
-        if (message.Username != CurrentUsername)
+        if (message.CreatedBy != CurrentUsername)
         {
             return;
         }
@@ -210,24 +217,24 @@ public partial class Chat : IAsyncDisposable
             });
     }   
         
-    async Task DeleteMessageById(ChannelMessage message)
+    async Task DeleteMessageById(ChannelMessageDto message)
     {
-        if (message.Username != CurrentUsername)
+        if (message.CreatedBy != CurrentUsername)
         {
             return;
         }
 
         await InvokeAsync(async () =>
         {
-            await _hubConnection.InvokeAsync("DeleteMessageById", message.Id);
-            await ChatApi.DeleteMessageById(message.Id);
+            //await _hubConnection.InvokeAsync("DeleteMessageById", message.Id);
+            await MessageApi.DeleteMessageById(message.Id);
         });
     }
-    async Task LoadChannelChat(Channel channel)
+    async Task LoadChannelChat(ChannelDto channel)
     {
-        await _hubConnection.InvokeAsync("RemoveChannelById", CurrentChannel.Id);
-        await _hubConnection.InvokeAsync("JoinChannelById", channel.Id);
-        _messages = await ChannelApi.GetMessagesFomChannelAsync(channel.Id);
+        await _hubConnection.InvokeAsync("JoinChannel", CurrentChannel.Id);
+        await _hubConnection.InvokeAsync("LeaveChannel", channel.Id);
+        _messages = await MessageApi.GetMessagesFomChannelAsync(channel.Id);
         CGUID = channel.Id.ToString();
         CurrentChannel = channel;
         LocalStorage.SetItem(CurrentUserId.ToString(), CGUID);
@@ -290,7 +297,7 @@ public partial class Chat : IAsyncDisposable
             var tempchannel = result.Data;
             if ((string)tempchannel is { Length: > 0 } && Channels.Any(c => c.Name != (string)tempchannel))
             {
-                var newChannel = await ChannelApi.CreateChannelAsync((string)tempchannel);
+                var newChannel = await ChannelApi.CreateChannelAsync((ChannelManipulationDto)tempchannel);
                 Channels.Add(newChannel);
             }
         }

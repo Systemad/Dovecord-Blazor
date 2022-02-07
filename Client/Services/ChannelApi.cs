@@ -1,25 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dovecord.Shared;
+using Dovecord.Client.Shared.DTO.Channel;
+using Dovecord.Client.Shared.DTO.Message;
 using Refit;
 
 namespace Dovecord.Client.Services;
 
 public interface IChannelApi
 {
-    [Get("/Channel/channels")]
-    Task<List<Channel>> GetChannelsAsync();
+    [Get("")]
+    Task<List<ChannelDto>> GetChannelsAsync();
 
-    [Get("/chat/{id}")]
-    Task<List<ChannelMessage>> GetMessagesFomChannelAsync(Guid id);
+    [Post("")]
+    Task<ChannelDto> CreateChannelAsync([Body]ChannelManipulationDto channel);
     
-    [Post("/Channel/{channel}")]
-    Task<Channel> CreateChannelAsync(string channel);
+    [Put("/{id}")]
+    Task UpdateChannelAsync(Guid id, ChannelManipulationDto channel);
     
-    [Put("/Channel")]
-    Task UpdateChannelAsync(Channel channel);
-    
-    [Delete("/Channel/{id}")]
+    [Delete("/{id}")]
     Task DeleteChannelAsync(Guid id);
 }
