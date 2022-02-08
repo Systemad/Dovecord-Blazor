@@ -1,0 +1,28 @@
+﻿@using Dovecord.Client.Shared.DTO.User
+<MudList>
+    @if (Users is null)
+    {
+        @for (var i = 0; i < 10; i++)
+        {
+            i++;
+            <UserLoading/>
+        }
+    }
+    else
+    {
+        <MudListSubheader Class="ml-n2 mb-n4"><b>ONLINE</b></MudListSubheader>
+        @foreach (var user in Users.Where(x => x.IsOnline == true))
+        {
+            <User UserName="@user.Name" OnlineStatus="Color.Success"/>
+        }
+        <MudListSubheader Class="ml-n2 mb-n4"><b>OFFLINE</b></MudListSubheader>
+        @foreach (var user in Users.Where(x => x.IsOnline != true))
+        {
+            <User UserName="@user.Name" OnlineStatus="Color.Error"/>
+        }    
+    }
+</MudList>
+
+@code {
+    [Parameter] public List<UserDto> Users { get; set; }
+}

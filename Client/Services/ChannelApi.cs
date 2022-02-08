@@ -12,11 +12,11 @@ public interface IChannelApi
     [Get("")]
     Task<List<ChannelDto>> GetChannelsAsync();
 
-    [Post("")]
+    [Post("/")]
     Task<ChannelDto> CreateChannelAsync([Body]ChannelManipulationDto channel);
     
     [Put("/{id}")]
-    Task UpdateChannelAsync(Guid id, ChannelManipulationDto channel);
+    Task UpdateChannelAsync(Guid id, [Body] ChannelManipulationDto channel);
     
     [Delete("/{id}")]
     Task DeleteChannelAsync(Guid id);

@@ -15,8 +15,10 @@ public static class WasmHostExtension
 {
     public static void AddClientServices(this WebAssemblyHostBuilder builder)
     {
-        builder.Services.AddHttpClient("Dovecord.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+        
+        builder.Services.AddHttpClient("Dovecord.ServerAPI", client => client.BaseAddress = new Uri("https://localhost:7045/"))
             .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+        
         builder.Services.AddRefitClient<IChannelApi>()
             .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:7045/api/channels"); })
             .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
@@ -24,7 +26,7 @@ public static class WasmHostExtension
             .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:7045/api/messages"); })
             .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
         builder.Services.AddRefitClient<IUserApi>()
-            .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:7045/api"); })
+            .ConfigureHttpClient(c => { c.BaseAddress = new Uri("https://localhost:7045/api/users"); })
             .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
         builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Dovecord.ServerAPI"));

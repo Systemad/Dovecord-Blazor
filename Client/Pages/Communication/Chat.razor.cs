@@ -61,18 +61,18 @@ public partial class Chat : IAsyncDisposable
     [Inject] public ISnackbar Snackbar { get; set; }
 
     private string isTypingMarkup;
-    private string placeholder;
+    private string _placeholder;
     private string CurrentUsername;
-    private Guid CurrentUserId;
+    private Guid _currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
         _hubConnection = new HubConnectionBuilder()
-            .WithUrl(_navigationManager.ToAbsoluteUri("/chathub"),
+            .WithUrl("https://localhost:7045/chathub",
                 options => options.AccessTokenProvider =
                     async () => await GetAccessTokenValueAsync())
-            .WithAutomaticReconnect()
-            .AddMessagePackProtocol()
+            //.WithAutomaticReconnect()
+            //.AddMessagePackProtocol()
             .Build();
 
         _hubRegistrations.Add(_hubConnection.OnMessageReceived(OnMessageReceivedAsync));
@@ -84,7 +84,7 @@ public partial class Chat : IAsyncDisposable
         var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         CurrentUsername = user.Identity?.Name;
-        CurrentUserId = Guid.Parse(authState.User.Claims.FirstOrDefault(c => c.Type == "sub").Value);
+        _currentUserId = Guid.Parse(authState.User.Claims.FirstOrDefault(c => c.Type == "sub").Value);
             
         await LoadChannelInfo();
         await LoadChannelChat(CurrentChannel);
@@ -237,21 +237,21 @@ public partial class Chat : IAsyncDisposable
         _messages = await MessageApi.GetMessagesFomChannelAsync(channel.Id);
         CGUID = channel.Id.ToString();
         CurrentChannel = channel;
-        LocalStorage.SetItem(CurrentUserId.ToString(), CGUID);
+        LocalStorage.SetItem(_currentUserId.ToString(), CGUID);
         _navigationManager.NavigateTo($"{CGUID}");
     }
         
     async Task LoadChannelInfo()
     {
         Channels = await ChannelApi.GetChannelsAsync();
-        var lastChannel = LocalStorage.ContainKey(CurrentUserId.ToString());
+        var lastChannel = LocalStorage.ContainKey(_currentUserId.ToString());
         if (!lastChannel) 
         {
             CurrentChannel = Channels.First(a => a.Name == "General");
             CGUID = CurrentChannel.Id.ToString();
         }
         else {
-            CGUID = LocalStorage.GetItem<string>(CurrentUserId.ToString()); 
+            CGUID = LocalStorage.GetItem<string>(_currentUserId.ToString()); 
             CurrentChannel = Channels.First(a => a.Id == Guid.Parse(CGUID));
         }
         _navigationManager.NavigateTo($"{CGUID}");

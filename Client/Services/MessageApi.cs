@@ -11,11 +11,11 @@ public interface IMessageApi
     [Delete("/{id}")]
     Task DeleteMessageById(Guid id);
         
-    [Post("")]
+    [Post("/")]
     Task SaveMessage([Body]MessageManipulationDto message);
         
     [Put("/{id}")]
-    Task UpdateMessage([Body]MessageManipulationDto message);
+    Task UpdateMessage(Guid id, [Body]MessageManipulationDto message);
     
     [Get("/channel/{id}")]
     Task<List<ChannelMessageDto>> GetMessagesFomChannelAsync(Guid id);
